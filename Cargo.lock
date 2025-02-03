@@ -338,6 +338,7 @@ dependencies = [
  "iana-time-zone",
  "js-sys",
  "num-traits",
+ "serde",
  "wasm-bindgen",
  "windows-targets 0.52.6",
 ]
@@ -2903,6 +2904,7 @@ dependencies = [
  "chrono",
  "nom 8.0.0",
  "remain",
+ "serde",
  "thiserror 2.0.11",
 ]
 
@@ -2999,6 +3001,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a007b6936676aa9ab40207cde35daab0a04b823be8ae004368c0793b96a61e0"
 dependencies = [
  "bytes",
+ "chrono",
  "crc",
  "crossbeam-queue",
  "either",
@@ -3025,6 +3028,7 @@ dependencies = [
  "tokio-stream",
  "tracing",
  "url",
+ "uuid",
  "webpki-roots",
 ]
 
@@ -3078,6 +3082,7 @@ dependencies = [
  "bitflags",
  "byteorder",
  "bytes",
+ "chrono",
  "crc",
  "digest",
  "dotenvy",
@@ -3106,6 +3111,7 @@ dependencies = [
  "stringprep",
  "thiserror 2.0.11",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -3119,6 +3125,7 @@ dependencies = [
  "base64",
  "bitflags",
  "byteorder",
+ "chrono",
  "crc",
  "dotenvy",
  "etcetera",
@@ -3143,6 +3150,7 @@ dependencies = [
  "stringprep",
  "thiserror 2.0.11",
  "tracing",
+ "uuid",
  "whoami",
 ]
 
@@ -3153,6 +3161,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f85ca71d3a5b24e64e1d08dd8fe36c6c95c339a896cc33068148906784620540"
 dependencies = [
  "atoi",
+ "chrono",
  "flume",
  "futures-channel",
  "futures-core",
@@ -3167,6 +3176,7 @@ dependencies = [
  "sqlx-core",
  "tracing",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -3868,6 +3878,7 @@ name = "web"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "cfg-if",
  "console_error_panic_hook",
  "leptos 0.7.5",
  "leptos-remix-icon",
@@ -3877,9 +3888,12 @@ dependencies = [
  "reactive_stores",
  "send_wrapper",
  "serde",
+ "serde_json",
+ "shotmarker-csv-parser",
  "sqlx",
  "thaw",
  "tokio",
+ "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
 ]

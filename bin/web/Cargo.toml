@@ -9,6 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 axum                     = { version = "0.7", optional = true }
+cfg-if                   = { version = "1.0.0" }
 console_error_panic_hook = { version = "0.1", optional = true }
 leptos                   = { version = "0.7.0", features = ["nightly"] }
 leptos_axum              = { version = "0.7.0", optional = true }
@@ -17,30 +18,28 @@ leptos-remix-icon        = { version = "1.0.3" }
 leptos_router            = { version = "0.7.0", features = ["nightly"] }
 reactive_stores          = { version = "0.1.5" }
 send_wrapper             = { version = "0.6.0" }
-serde                    = { version = "1.0.217" }
+serde                    = { workspace = true }
+serde_json               = { workspace = true }
+shotmarker-csv-parser    = { path = "../../lib/shotmarker-csv-parser", optional = true }
 sqlx                     = { workspace = true, optional = true }
 thaw                     = { version = "0.4.2", features = ["nightly"] }
 tokio                    = { version = "1", features = ["rt-multi-thread"], optional = true }
+uuid                     = { workspace = true }
 wasm-bindgen             = { version = "=0.2.100", optional = true }
 wasm-bindgen-futures     = { version = "0.4.50" }
 
 [features]
 default = ["ssr"]
-hydrate = [
-    "leptos/hydrate",
-    "dep:console_error_panic_hook",
-    "dep:wasm-bindgen",
-    "thaw/hydrate",
-    # "dep:wasm-bindgen-futures",
-]
+hydrate = ["leptos/hydrate", "dep:console_error_panic_hook", "dep:wasm-bindgen", "thaw/hydrate"]
 ssr = [
     "dep:axum",
-    "dep:tokio",
     "dep:leptos_axum",
-    "leptos/ssr",
+    "dep:shotmarker-csv-parser",
+    "dep:sqlx",
+    "dep:tokio",
     "leptos_meta/ssr",
     "leptos_router/ssr",
-    "dep:sqlx",
+    "leptos/ssr",
     "thaw/ssr",
 ]
 

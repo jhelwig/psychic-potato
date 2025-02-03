@@ -11,4 +11,5 @@ nom.workspace    = true
 # nom-tracer isn't compatible with nom 8.0.0 yet, and only works with 7.x at most.
 # nom-tracer = { version = "1.0.1", features = ["trace-color", "trace-context"] }
 remain.workspace    = true
+serde.workspace     = true
 thiserror.workspace = true

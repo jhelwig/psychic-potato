@@ -71,27 +71,32 @@ pub fn App() -> impl IntoView {
 
         // content for this welcome page
         <ConfigProvider>
-            <nav>
-                <a href="/">Home</a>
-                <a href="/admin">Admin</a>
-            </nav>
-            <Router>
-                <main>
-                    <MessageBar intent=MessageBarIntent::Warning>
-                        <MessageBarBody>
-                            <MessageBarTitle>"Under Construction"</MessageBarTitle>
-                            "This site is still in development. Expect broken things. You have been warned."
-                        </MessageBarBody>
-                    </MessageBar>
-                    <Routes fallback=|| "Page not found.".into_view()>
-                        <Route path=StaticSegment("") view=HomePage />
-                        <ParentRoute path=StaticSegment("admin") view=admin::AdminHome>
-                            <Route path=StaticSegment("upload") view=admin::ShotMarkerCsvUpload />
-                            <Route path=StaticSegment("") view=admin::Dashboard />
-                        </ParentRoute>
-                    </Routes>
-                </main>
-            </Router>
+            <ToasterProvider>
+                <nav>
+                    <a href="/">Home</a>
+                    <a href="/admin">Admin</a>
+                </nav>
+                <Router>
+                    <main>
+                        <MessageBar intent=MessageBarIntent::Warning>
+                            <MessageBarBody>
+                                <MessageBarTitle>"Under Construction"</MessageBarTitle>
+                                "This site is still in development. Expect broken things. You have been warned."
+                            </MessageBarBody>
+                        </MessageBar>
+                        <Routes fallback=|| "Page not found.".into_view()>
+                            <Route path=StaticSegment("") view=HomePage />
+                            <ParentRoute path=StaticSegment("admin") view=admin::AdminHome>
+                                <Route
+                                    path=StaticSegment("upload")
+                                    view=admin::upload::ShotMarkerCsvUpload
+                                />
+                                <Route path=StaticSegment("") view=admin::Dashboard />
+                            </ParentRoute>
+                        </Routes>
+                    </main>
+                </Router>
+            </ToasterProvider>
         </ConfigProvider>
     }
 }

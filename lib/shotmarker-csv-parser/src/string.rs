@@ -1,12 +1,16 @@
 use crate::string::shot::ShotMarkerShot;
 use chrono::NaiveDate;
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 pub mod shot;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShotMarkerStringMetrics {}
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShotMarkerShotString {
     pub date:     NaiveDate,
     pub name:     String,

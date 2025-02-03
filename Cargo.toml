@@ -10,15 +10,18 @@ version = "0.1.0"
 
 [workspace.dependencies]
 anyhow = "1.0.95"
-chrono = "0.4.39"
+chrono = { version = "0.4.39", features = ["serde"] }
 miette = "7.5.0"
 nom    = "8.0.0"
 # nom-tracer isn't compatible with nom 8.0.0 yet, and only works with 7.x at most.
 # nom-tracer = { version = "1.0.1", features = ["trace-color", "trace-context"] }
-remain    = "0.2.14"
-sqlx      = { version = "0.8.3", features = ["runtime-tokio-rustls", "sqlite"] }
-thiserror = "2.0.11"
-uuid      = "1.12.1"
+remain     = "0.2.14"
+serde      = { version = "1.0.217" }
+serde_json = { version = "1.0.138" }
+sqlx       = { version = "0.8.3", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
+thiserror  = "2.0.11"
+ulid       = "1.1.4"
+uuid       = "1.12.1"
 
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
