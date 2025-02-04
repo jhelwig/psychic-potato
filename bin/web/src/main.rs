@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 use cfg_if::cfg_if;
 
 cfg_if! {

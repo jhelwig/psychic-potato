@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![feature(let_chains)]
 
 use cfg_if::cfg_if;
 

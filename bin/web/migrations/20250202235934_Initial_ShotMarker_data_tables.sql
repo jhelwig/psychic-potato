@@ -1,14 +1,14 @@
-DROP TABLE IF EXISTS shot;
-DROP TABLE IF EXISTS shot_string;
-DROP TABLE IF EXISTS match;
+DROP TABLE IF EXISTS shots;
+DROP TABLE IF EXISTS shot_strings;
+DROP TABLE IF EXISTS matches;
 
-CREATE TABLE match (
+CREATE TABLE matches (
   id TEXT PRIMARY KEY,
   NAME TEXT,
   DATE TEXT
 );
 
-CREATE TABLE shot_string (
+CREATE TABLE shot_strings (
   id TEXT PRIMARY KEY,
   match_id TEXT,
   DATE TEXT,
@@ -17,10 +17,10 @@ CREATE TABLE shot_string (
   distance TEXT,
   score TEXT,
   metrics TEXT,
-  FOREIGN KEY(match_id) REFERENCES match(id)
+  FOREIGN KEY(match_id) REFERENCES matches(id)
 );
 
-CREATE TABLE shot (
+CREATE TABLE shots (
   id TEXT PRIMARY KEY,
   shot_string_id TEXT,
   shot_string TEXT,
@@ -32,5 +32,5 @@ CREATE TABLE shot (
   yaw TEXT,
   pitch TEXT,
   quality TEXT,
-  FOREIGN KEY(shot_string_id) REFERENCES shot_string(id)
+  FOREIGN KEY(shot_string_id) REFERENCES shot_strings(id)
 );

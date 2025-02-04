@@ -91,6 +91,10 @@ pub fn App() -> impl IntoView {
                                     path=StaticSegment("upload")
                                     view=admin::upload::ShotMarkerCsvUpload
                                 />
+                                <Route
+                                    path=StaticSegment("assign_strings")
+                                    view=admin::assign_strings::AssignStrings
+                                />
                                 <Route path=StaticSegment("") view=admin::Dashboard />
                             </ParentRoute>
                         </Routes>

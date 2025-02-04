@@ -113,7 +113,7 @@ pub async fn upload_shotmarker_csv(
 
         let export_id = Uuid::new_v4();
         sqlx::query!(
-            "INSERT INTO match (id, name, date) VALUES ($1, $2, $3)",
+            "INSERT INTO matches (id, name, date) VALUES ($1, $2, $3)",
             export_id,
             shotmarker_export.string_date,
             shotmarker_export.string_date,
@@ -124,7 +124,7 @@ pub async fn upload_shotmarker_csv(
         for shot_string in shotmarker_export.strings {
             let shot_string_id = Uuid::new_v4();
             sqlx::query!(
-                "INSERT INTO shot_string (id, match_id, date, name, target, distance, score) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+                "INSERT INTO shot_strings (id, match_id, date, name, target, distance, score) VALUES ($1, $2, $3, $4, $5, $6, $7)",
                 shot_string_id,
                 export_id,
                 shot_string.date,
@@ -144,7 +144,7 @@ pub async fn upload_shotmarker_csv(
                 let yaw = serde_json::to_value(shot.yaw)?;
                 let pitch = serde_json::to_value(shot.pitch)?;
                 sqlx::query!(
-                    "INSERT INTO shot (id, shot_string_id, shot_string, shot_id, tags, score, position, velocity, yaw, pitch, quality) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
+                    "INSERT INTO shots (id, shot_string_id, shot_string, shot_id, tags, score, position, velocity, yaw, pitch, quality) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)",
                     shot_id,
                     shot_string_id,
                     shot.time,
