@@ -1,0 +1,3 @@
+{
+  "rust-analyzer.rustfmt.overrideCommand": ["yew-fmt"]
+}

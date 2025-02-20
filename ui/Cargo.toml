@@ -1,0 +1,25 @@
+[package]
+name              = "ui"
+version.workspace = true
+edition.workspace = true
+description       = "Template for starting a Yew project using Trunk"
+readme            = "README.md"
+license.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+anyhow             = { workspace = true }
+browser-panic-hook = "0.2.0"
+gloo-utils         = "0.2.0"
+log                = "0.4.25"
+patternfly-yew     = { version = "0.6.3", features = ["tree", "icons-fab"] }
+wasm-bindgen       = "0.2.100"
+wasm-logger        = "0.2.0"
+yew                = { version = "0.21", features = ["csr"] }
+yew-nested-router  = "0.7.2"
+
+[profile.release]
+panic         = 'abort'
+codegen-units = 1
+opt-level     = 's'
+lto           = true
