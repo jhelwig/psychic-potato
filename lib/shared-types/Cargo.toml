@@ -7,9 +7,14 @@ version.workspace = true
 publish.workspace = true
 
 [dependencies]
-chrono = { workspace = true }
-remain = { workspace = true }
-serde  = { version = "1.0.218", features = ["derive"] }
-uuid   = { version = "1.14.0", features = ["serde"] }
+chrono         = { workspace = true }
+patternfly-yew = { workspace = true, optional = true }
+remain         = { workspace = true }
+serde          = { version = "1.0.218", features = ["derive"] }
+uuid           = { version = "1.14.0", features = ["serde"] }
+yew            = { workspace = true, optional = true }
 
 shotmarker-csv-parser = { path = "../shotmarker-csv-parser" }
+
+[features]
+patternfly-yew = ["dep:yew", "dep:patternfly-yew"]

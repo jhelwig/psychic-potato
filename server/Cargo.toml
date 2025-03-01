@@ -7,11 +7,13 @@ publish.workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
-axum = { version = "0.8.1", features = ["tracing"] }
+axum = { version = "0.8.1", features = ["multipart", "tracing"] }
+axum_session_auth = { workspace = true }
+axum_session_sqlx = { workspace = true }
 chrono = { workspace = true }
 log = { workspace = true }
 serde_json = { workspace = true }
-sqlx = { version = "*", features = ["runtime-tokio-rustls", "sqlite", "uuid", "chrono"] }
+sqlx = { version = "0.8.3", features = ["runtime-tokio-rustls", "sqlite", "uuid", "chrono"] }
 thiserror = { workspace = true }
 tokio = { version = "1.43.0", features = ["full"] }
 tower = { version = "0.5.2", features = ["util"] }
@@ -19,10 +21,12 @@ tower-http = { version = "0.6.2", features = [
   "compression-full",
   "cors",
   "decompression-full",
+  "limit",
   "set-header",
   "timeout",
   "trace",
 ] }
 uuid = { workspace = true }
 
-shared-types = { path = "../lib/shared-types" }
+shared-types          = { path = "../lib/shared-types" }
+shotmarker-csv-parser = { path = "../lib/shotmarker-csv-parser" }

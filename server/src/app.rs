@@ -34,6 +34,7 @@ use tower_http::{
 use crate::error::AppError;
 
 pub mod export;
+pub mod leagues;
 pub mod matches;
 
 #[derive(Debug, Clone)]
@@ -72,6 +73,7 @@ pub fn build(app_state: AppState) -> Router {
     Router::new()
         .nest("/exports", export::router(app_state.clone()))
         .nest("/match", matches::router(app_state.clone()))
+        .nest("/league", leagues::router(app_state.clone()))
         .layer(service_builder)
         .with_state(app_state)
         .fallback(handler_404)

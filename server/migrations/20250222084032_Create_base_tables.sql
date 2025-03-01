@@ -1,36 +1,49 @@
-CREATE TABLE matches (id, match_name, event_date);
+CREATE TABLE leagues (
+  id TEXT PRIMARY KEY,
+  league_name TEXT,
+  created_at TEXT
+);
+
+CREATE TABLE matches (
+  id TEXT PRIMARY KEY,
+  match_name TEXT,
+  event_date TEXT,
+  league_id TEXT REFERENCES leagues(id) ON
+  DELETE CASCADE
+);
 
 CREATE TABLE exports (
-  id,
-  generated_date,
-  string_count,
-  string_date,
-  match_id,
-  FOREIGN KEY (match_id) REFERENCES matches(id)
+  id TEXT PRIMARY KEY,
+  file_name TEXT,
+  generated_date TEXT,
+  string_count INTEGER,
+  string_date TEXT,
+  match_id TEXT REFERENCES matches(id) ON
+  DELETE CASCADE
 );
 
 CREATE TABLE strings (
-  id,
-  string_date,
-  string_name,
-  target,
-  distance,
-  score,
-  export_id,
-  FOREIGN KEY (export_id) REFERENCES exports(id)
+  id TEXT PRIMARY KEY,
+  string_date TEXT,
+  string_name TEXT,
+  target TEXT,
+  distance TEXT,
+  score TEXT,
+  export_id TEXT REFERENCES exports(id) ON
+  DELETE CASCADE
 );
 
 CREATE TABLE shots (
-  id,
-  shot_time,
-  shot_id,
-  tags,
-  score,
-  position,
-  velocity,
-  yaw,
-  pitch,
-  quality,
-  string_id,
-  FOREIGN KEY (string_id) REFERENCES strings(id)
+  id TEXT PRIMARY KEY,
+  shot_time TEXT,
+  shot_id TEXT,
+  tags TEXT,
+  score TEXT,
+  position TEXT,
+  velocity TEXT,
+  yaw TEXT,
+  pitch TEXT,
+  quality TEXT,
+  string_id TEXT REFERENCES strings(id) ON
+  DELETE CASCADE
 )

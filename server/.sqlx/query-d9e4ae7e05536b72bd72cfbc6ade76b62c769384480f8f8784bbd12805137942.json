@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO matches (id, match_name, event_date)\nVALUES ($1, $2, $3);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "d9e4ae7e05536b72bd72cfbc6ade76b62c769384480f8f8784bbd12805137942"
+}

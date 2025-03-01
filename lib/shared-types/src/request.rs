@@ -6,7 +6,22 @@ use serde::{
 use uuid::Uuid;
 
 #[remain::sorted]
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum LeagueOperation {
+    Create {
+        league_name: String,
+    },
+    Delete {
+        id: Uuid,
+    },
+    SetName {
+        id:          Uuid,
+        league_name: String,
+    },
+}
+
+#[remain::sorted]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum MatchOperation {
     Create {
         name:       String,
@@ -23,4 +38,13 @@ pub enum MatchOperation {
         id:   Uuid,
         name: String,
     },
+}
+
+impl std::default::Default for MatchOperation {
+    fn default() -> Self {
+        MatchOperation::Create {
+            name:       String::new(),
+            event_date: NaiveDate::default(),
+        }
+    }
 }

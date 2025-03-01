@@ -1,6 +1,8 @@
 use chrono::{
+    DateTime,
     NaiveDate,
     NaiveTime,
+    Utc,
 };
 use serde::{
     Deserialize,
@@ -13,16 +15,24 @@ use shotmarker_csv_parser::string::shot::{
 };
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct League {
+    pub id:         Uuid,
+    pub name:       String,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 pub struct Match {
     pub id:         Uuid,
     pub name:       String,
     pub event_date: NaiveDate,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ShotMarkerExport {
     pub id:             Uuid,
+    pub file_name:      String,
     pub generated_date: NaiveDate,
     pub string_count:   i32,
     pub string_date:    NaiveDate,

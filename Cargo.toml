@@ -12,18 +12,25 @@ publish = false
 [workspace.dependencies]
 # nom-tracer isn't compatible with nom 8.0.0 yet, and only works with 7.x at most.
 # nom-tracer = { version = "1.0.1", features = ["trace-color", "trace-context"] }
-anyhow     = "1.0.95"
-chrono     = { version = "0.4.39", features = ["serde"] }
-log        = "0.4.26"
-miette     = "7.5.0"
-nom        = "8.0.0"
-remain     = "0.2.14"
-serde      = { version = "1.0.218" }
-serde_json = { version = "1.0.139" }
-sqlx       = { version = "0.8.3", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
-thiserror  = "2.0.11"
-ulid       = "1.1.4"
-uuid       = { version = "1.14.0", features = ["serde"] }
+anyhow            = { version = "1.0.95" }
+async-trait       = { version = "0.1.86" }
+axum_session_auth = { version = "0.16.0" }
+axum_session_sqlx = { version = "0.5.0" }
+cfg-if            = { version = "1.0.0" }
+chrono            = { version = "0.4.40", features = ["serde"] }
+gloo-net          = { version = "0.6.0" }
+log               = { version = "0.4.26" }
+miette            = { version = "7.5.0" }
+nom               = { version = "8.0.0" }
+patternfly-yew    = { version = "0.6.3", features = ["tree", "icons-fab"] }
+remain            = { version = "0.2.14" }
+serde             = { version = "1.0.218" }
+serde_json        = { version = "1.0.139" }
+sqlx              = { version = "0.8.3", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
+thiserror         = { version = "2.0.11" }
+ulid              = { version = "1.1.4" }
+uuid              = { version = "1.15.1", features = ["serde", "v4"] }
+yew               = { version = "0.21", features = ["csr"] }
 
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
