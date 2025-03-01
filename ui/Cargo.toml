@@ -3,6 +3,7 @@ name              = "ui"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+publish.workspace = true
 
 [dependencies]
 anyhow             = { workspace = true }
@@ -19,9 +20,3 @@ yew-nested-router  = "0.7.2"
 [dependencies.web-sys]
 version  = "0.3.77"
 features = ["HtmlElement", "HtmlInputElement", "MediaQueryList"]
-
-[profile.release]
-panic         = 'abort'
-codegen-units = 1
-opt-level     = 's'
-lto           = true

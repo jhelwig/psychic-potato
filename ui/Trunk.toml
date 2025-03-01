@@ -1,3 +1,8 @@
 [[proxy]]
 rewrite = "/api/"
 backend = "http://localhost:9000/"
+
+[tools]
+# Needed for newer versions of rust that try to use bulk memory for wasm
+# https://github.com/trunk-rs/trunk/issues/904
+wasm_opt = "version_119"
