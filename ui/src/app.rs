@@ -1,6 +1,8 @@
 use patternfly_yew::prelude::*;
+use uuid::Uuid;
 use yew::prelude::*;
 use yew_nested_router::{
+    components::Link,
     prelude::{
         Switch as RouterSwitch,
         *,
@@ -8,18 +10,57 @@ use yew_nested_router::{
     Target,
 };
 
-mod admin;
+pub mod admin;
+pub mod leagues;
+pub mod matches;
 
-use admin::{
-    AdminPanel,
-    AdminRoute,
+use crate::app::{
+    admin::{
+        AdminPanel,
+        AdminRoute,
+    },
+    leagues::{
+        LeaguePanel,
+        LeagueRoute,
+        LeaguesPanel,
+    },
 };
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Target)]
 pub enum AppRoute {
     #[default]
+    #[target(index)]
     Index,
     Admin(AdminRoute),
+    Leagues,
+    #[target(rename = "leagues")]
+    League {
+        league_id: Uuid,
+        #[target(nested)]
+        details:   LeagueRoute,
+    },
+}
+
+impl AppRoute {
+    pub fn mapper_league(league_id: Uuid) -> Mapper<AppRoute, LeagueRoute> {
+        let downwards = |page| {
+            match page {
+                AppRoute::League {
+                    details,
+                    ..
+                } => Some(details),
+                _ => None,
+            }
+        };
+        let upwards = move |d| {
+            AppRoute::League {
+                league_id,
+                details: d,
+            }
+        };
+
+        Mapper::new(downwards, upwards)
+    }
 }
 
 #[function_component(App)]
@@ -38,30 +79,53 @@ pub fn app() -> Html {
 fn brand() -> Html {
     html! {
         <MastheadBrand>
-            <Brand
-                src="images/logo.png"
-                alt="Patternfly Logo"
-                style="--pf-v5-c-brand--Height: 36px;"
-            />
+            <Link<AppRoute> to={AppRoute::Index}>
+                <Brand
+                    src="images/logo.png"
+                    alt="TCGC 600 yard league"
+                    style="--pf-v5-c-brand--Height: 36px;"
+                />
+            </Link<AppRoute>>
         </MastheadBrand>
     }
 }
 
 fn switch_app_route(target: AppRoute) -> Html {
     match target {
+        AppRoute::Index => {
+            html! {
+                <AppPage>
+                    <Index />
+                </AppPage>
+            }
+        }
+        AppRoute::League {
+            league_id,
+            ..
+        } => {
+            html! {
+                <AppPage>
+                    <PageContent title={format!("League {league_id}")}>
+                        <LeaguePanel {league_id} />
+                    </PageContent>
+                </AppPage>
+            }
+        }
+        AppRoute::Leagues => {
+            html! {
+                <AppPage>
+                    <PageContent title="Leagues">
+                        <LeaguesPanel />
+                    </PageContent>
+                </AppPage>
+            }
+        }
         AppRoute::Admin(_) => {
             html! {
                 <AppPage>
                     <PageContent title="Admin">
                         <AdminPanel />
                     </PageContent>
-                </AppPage>
-            }
-        }
-        AppRoute::Index => {
-            html! {
-                <AppPage>
-                    <Index />
                 </AppPage>
             }
         }
@@ -84,13 +148,17 @@ pub fn app_page(props: &PageProps) -> Html {
                     <NavRouterItem<AppRoute> to={AppRoute::default()}>
                         { "Home" }
                     </NavRouterItem<AppRoute>>
+                    { leagues::leagues_nav_menu() }
                     { admin::admin_nav_menu() }
                 </NavList>
             </Nav>
         </PageSidebar>
     };
-    let open = false;
+    // TODO: Remember navbar open state across page reloads.
+    let open = true;
 
+    // TODO: Remember dark mode choice across page reloads.
+    // TODO: Have On/Off/Auto choices for dark mode.
     let darkmode = use_state_eq(|| {
         gloo_utils::window()
             .match_media("(prefers-color-scheme: dark)")

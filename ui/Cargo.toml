@@ -25,6 +25,7 @@ yew-nested-router  = "0.7.2"
 shared-types = { path = "../lib/shared-types", features = ["patternfly-yew"] }
 
 [dependencies.web-sys]
+version = "0.3.77"
 features = [
   "Headers",
   "HtmlElement",

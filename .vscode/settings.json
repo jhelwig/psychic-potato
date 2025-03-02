@@ -1,6 +1,6 @@
 {
   "rust-analyzer.rustfmt.overrideCommand": ["yew-fmt"],
   "debug.javascript.defaultRuntimeExecutable": {
-    "pwa-node": "c:\\users\\jacob\\appdata\\local\\mise\\shims\\node.cmd"
+    "pwa-node": "/home/jhelwig/snap/code/179/.local/share/mise/shims/node"
   }
 }
