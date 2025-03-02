@@ -19,6 +19,7 @@ use yew_nested_router::{
 use crate::app::{
     matches::MatchesRoute,
     AppRoute,
+    PageContent,
 };
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Target)]
@@ -81,11 +82,13 @@ pub fn league_panel(props: &LeaguePanelProps) -> Html {
 #[function_component(LeaguesPanel)]
 pub fn leagues_panel() -> Html {
     html! {
-        <Content>
-            <Suspense fallback={html!({"Loading..."})}>
-                <LeagueList />
-            </Suspense>
-        </Content>
+        <PageContent title="Leagues">
+            <Content>
+                <Suspense fallback={html!({"Loading..."})}>
+                    <LeagueList />
+                </Suspense>
+            </Content>
+        </PageContent>
     }
 }
 
@@ -93,7 +96,7 @@ fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
     let route = match target {
         LeagueRoute::Details => {
             html!(
-                <>
+                <PageContent title={format!("League {league_id}")}>
                     <Content>
                         { format!("League {league_id} details.") }
                     </Content>
@@ -102,13 +105,13 @@ fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
                             { format!("Link to {league_id} match list") }
                         </Link<LeagueRoute>>
                     </Content>
-                </>
+                </PageContent>
             )
         }
         LeagueRoute::Matches => {
             let match_id = Uuid::new_v4();
             html!(
-                <>
+                <PageContent title={format!("League {league_id}")} subtitle="Matches">
                     <Content>
                         { format!("Matches for league: ") }
                         <Link<AppRoute>
@@ -123,21 +126,24 @@ fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
                             { format!("Link to match {match_id}.") }
                         </Link<LeagueRoute>>
                     </Content>
-                </>
+                </PageContent>
             )
         }
         LeagueRoute::Match {
             match_id,
         } => {
             html!(
-                <>
+                <PageContent
+                    title={format!("League {league_id}")}
+                    subtitle={format!("Match {match_id}")}
+                >
                     <Content>
                         { format!("League: {league_id}") }
                     </Content>
                     <Content>
                         { format!("Match: {match_id}") }
                     </Content>
-                </>
+                </PageContent>
             )
         }
     };

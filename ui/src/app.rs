@@ -69,7 +69,9 @@ pub fn app() -> Html {
         <BackdropViewer>
             <ToastViewer>
                 <Router<AppRoute> default={AppRoute::Index}>
-                    <RouterSwitch<AppRoute> render={switch_app_route} />
+                    <AppPage>
+                        <RouterSwitch<AppRoute> render={switch_app_route} />
+                    </AppPage>
                 </Router<AppRoute>>
             </ToastViewer>
         </BackdropViewer>
@@ -93,40 +95,22 @@ fn brand() -> Html {
 fn switch_app_route(target: AppRoute) -> Html {
     match target {
         AppRoute::Index => {
-            html! {
-                <AppPage>
-                    <Index />
-                </AppPage>
-            }
+            html! { <Index /> }
         }
         AppRoute::League {
             league_id,
             ..
         } => {
-            html! {
-                <AppPage>
-                    <PageContent title={format!("League {league_id}")}>
-                        <LeaguePanel {league_id} />
-                    </PageContent>
-                </AppPage>
-            }
+            html! { <LeaguePanel {league_id} /> }
         }
         AppRoute::Leagues => {
-            html! {
-                <AppPage>
-                    <PageContent title="Leagues">
-                        <LeaguesPanel />
-                    </PageContent>
-                </AppPage>
-            }
+            html! { <LeaguesPanel /> }
         }
         AppRoute::Admin(_) => {
             html! {
-                <AppPage>
-                    <PageContent title="Admin">
-                        <AdminPanel />
-                    </PageContent>
-                </AppPage>
+                <PageContent title="Admin">
+                    <AdminPanel />
+                </PageContent>
             }
         }
     }
