@@ -9,6 +9,8 @@ use axum::{
 use serde_json::json;
 use thiserror::Error;
 
+use crate::app::leagues::LeagueError;
+
 #[derive(Debug, Clone, Error)]
 pub enum HttpResponse {
     #[error("Not Found")]
@@ -27,10 +29,15 @@ impl IntoResponse for HttpResponse {
     }
 }
 
-pub struct AppError(anyhow::Error);
+pub struct AppError(pub anyhow::Error);
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
+        if let Some(league_error) = self.0.downcast_ref::<LeagueError>() {
+            return (StatusCode::NOT_FOUND, Json(json!({"message": league_error.to_string()})))
+                .into_response();
+        }
+
         match self.0.downcast_ref::<HttpResponse>() {
             Some(response) => response.clone().into_response(),
             None => {

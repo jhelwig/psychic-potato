@@ -15,21 +15,21 @@ use shotmarker_csv_parser::string::shot::{
 };
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct League {
     pub id:         Uuid,
     pub name:       String,
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Match {
     pub id:         Uuid,
     pub name:       String,
     pub event_date: NaiveDate,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ShotMarkerExport {
     pub id:             Uuid,
     pub file_name:      String,
@@ -39,7 +39,7 @@ pub struct ShotMarkerExport {
     pub match_id:       Uuid,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ShotMarkerShotString {
     pub id:          Uuid,
     pub string_date: NaiveDate,
@@ -50,7 +50,7 @@ pub struct ShotMarkerShotString {
     pub export_id:   Uuid,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ShotMarkerShot {
     pub id:        Uuid,
     pub shot_time: NaiveTime,

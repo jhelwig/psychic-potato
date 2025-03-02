@@ -1,4 +1,6 @@
+use anyhow::Context;
 use axum::{
+    extract::Path,
     routing::{
         get,
         post,
@@ -14,6 +16,7 @@ use shared_types::{
     request::LeagueOperation,
     response::League,
 };
+use thiserror::Error;
 use uuid::Uuid;
 
 use crate::{
@@ -24,9 +27,18 @@ use crate::{
     error::AppError,
 };
 
+#[derive(Debug, Error)]
+pub enum LeagueError {
+    #[error("League not found: {league_id}")]
+    NotFound {
+        league_id: Uuid,
+    },
+}
+
 pub fn router(app_state: AppState) -> Router<AppState> {
     Router::new()
         .route("/", get(list_leagues))
+        .route("/{id}", get(get_league))
         .route("/operation", post(handle_league_operation))
         .with_state(app_state)
 }
@@ -39,6 +51,24 @@ pub async fn list_leagues(
         .await?;
 
     Ok(Json(leagues))
+}
+
+pub async fn get_league(
+    DbTransaction(mut txn): DbTransaction<'_>,
+    Path(id): Path<Uuid>,
+) -> Result<Json<League>, AppError> {
+    let league = sqlx::query_file_as!(League, "queries/leagues/get_league.sql", id)
+        .fetch_optional(&mut *txn)
+        .await?;
+
+    let Some(league) = league else {
+        return Err(LeagueError::NotFound {
+            league_id: id,
+        }
+        .into());
+    };
+
+    Ok(Json(league))
 }
 
 pub async fn handle_league_operation(

@@ -20,7 +20,7 @@ use crate::app::{
         AdminRoute,
     },
     leagues::{
-        LeaguePanel,
+        LeagueDetailsPanel,
         LeagueRoute,
         LeaguesPanel,
     },
@@ -101,7 +101,11 @@ fn switch_app_route(target: AppRoute) -> Html {
             league_id,
             ..
         } => {
-            html! { <LeaguePanel {league_id} /> }
+            html! {
+                <Suspense fallback={format!("Loading league details...")}>
+                    <LeagueDetailsPanel {league_id} />
+                </Suspense>
+            }
         }
         AppRoute::Leagues => {
             html! { <LeaguesPanel /> }

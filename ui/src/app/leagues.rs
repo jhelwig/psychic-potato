@@ -1,4 +1,7 @@
-use anyhow::Result;
+use anyhow::{
+    anyhow,
+    Result,
+};
 use gloo_net::http::Request;
 use patternfly_yew::prelude::*;
 use shared_types::response::League;
@@ -151,6 +154,58 @@ fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
     html!({ route })
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Properties)]
+pub struct LeagueDetailsPanelProps {
+    pub league_id: Uuid,
+}
+
+#[function_component(LeagueDetailsPanel)]
+pub fn league_details_panel(props: &LeagueDetailsPanelProps) -> HtmlResult {
+    let league_id = props.league_id;
+    let league_result = use_future(|| async move { fetch_league(league_id).await })?;
+
+    let html_result = match &*league_result {
+        Ok(league) => html!(<LeagueDetails league={league.clone()} />),
+        Err(e) => {
+            html!(
+                <Content>
+                    { format!("Error: {e}") }
+                </Content>
+            )
+        }
+    };
+
+    Ok(html_result)
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Properties)]
+struct LeagueDetailsProps {
+    pub league: League,
+}
+
+#[function_component(LeagueDetails)]
+fn league_details(props: &LeagueDetailsProps) -> Html {
+    let League {
+        id,
+        name,
+        created_at,
+    } = &props.league;
+
+    html! {
+        <PageContent title="League Details">
+            <Content>
+                { format!("ID: {id}") }
+            </Content>
+            <Content>
+                { format!("Name: {name}") }
+            </Content>
+            <Content>
+                { format!("Created: {created_at}") }
+            </Content>
+        </PageContent>
+    }
+}
+
 #[function_component(LeagueList)]
 fn league_list() -> HtmlResult {
     let leagues_result = use_future(|| async { fetch_leagues().await })?;
@@ -196,6 +251,21 @@ async fn fetch_leagues() -> Result<Vec<League>> {
     let leagues: Vec<League> = request.json().await?;
 
     Ok(leagues)
+}
+
+async fn fetch_league(league_id: Uuid) -> Result<League> {
+    let response = Request::get(&format!("/api/league/{league_id}")).send().await?;
+    let league: League = if response.ok() {
+        response.json().await?
+    } else {
+        return Err(anyhow!(
+            "Failed to fetch league: {}\n{}",
+            response.status(),
+            response.text().await?
+        ));
+    };
+
+    Ok(league)
 }
 
 #[derive(Debug, Clone, PartialEq, Properties)]
