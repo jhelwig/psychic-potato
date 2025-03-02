@@ -1,6 +1,6 @@
 use anyhow::{
-    anyhow,
     Result,
+    anyhow,
 };
 use gloo_net::http::Request;
 use patternfly_yew::prelude::*;
@@ -11,18 +11,18 @@ use yew::{
     suspense::use_future,
 };
 use yew_nested_router::{
+    Target,
     components::Link,
     prelude::{
         Switch as RouterSwitch,
         *,
     },
-    Target,
 };
 
 use crate::app::{
-    matches::MatchesRoute,
     AppRoute,
     PageContent,
+    matches::MatchesRoute,
 };
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, Target)]

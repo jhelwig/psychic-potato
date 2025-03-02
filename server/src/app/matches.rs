@@ -1,10 +1,10 @@
 use axum::{
+    Json,
+    Router,
     routing::{
         get,
         post,
     },
-    Json,
-    Router,
 };
 use chrono::NaiveDate;
 use shared_types::{

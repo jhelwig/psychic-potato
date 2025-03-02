@@ -1,11 +1,11 @@
 use patternfly_yew::prelude::*;
 use yew::prelude::*;
 use yew_nested_router::{
+    Target,
     prelude::{
         Switch as RouterSwitch,
         *,
     },
-    Target,
 };
 
 use crate::app::AppRoute;

@@ -1,5 +1,9 @@
 {
-  "rust-analyzer.rustfmt.overrideCommand": ["yew-fmt"],
+  "rust-analyzer.rustfmt.overrideCommand": [
+    "yew-fmt",
+    "--edition",
+    "2024"
+  ],
   "debug.javascript.defaultRuntimeExecutable": {
     "pwa-node": "/home/jhelwig/snap/code/179/.local/share/mise/shims/node"
   }

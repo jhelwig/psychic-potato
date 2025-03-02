@@ -2,12 +2,12 @@ use patternfly_yew::prelude::*;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_nested_router::{
+    Target,
     components::Link,
     prelude::{
         Switch as RouterSwitch,
         *,
     },
-    Target,
 };
 
 pub mod admin;

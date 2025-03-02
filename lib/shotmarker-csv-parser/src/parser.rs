@@ -4,6 +4,8 @@ use chrono::{
     NaiveTime,
 };
 use nom::{
+    IResult,
+    Parser,
     branch::alt,
     bytes::complete::{
         tag,
@@ -17,24 +19,25 @@ use nom::{
         value,
     },
     error::{
-        context,
         ErrorKind,
         FromExternalError,
+        context,
     },
     multi::{
-        many0,
         many_m_n,
+        many0,
     },
     number::complete::double,
     sequence::terminated,
-    IResult,
-    Parser,
 };
 
 use crate::{
+    ShotMarkerExport,
     error::ShotMarkerCsvParserError,
     parser::util::ws,
     string::{
+        ShotMarkerShotString,
+        ShotMarkerStringMetrics,
         shot::{
             ShotMarkerShot,
             ShotPosition,
@@ -45,10 +48,7 @@ use crate::{
             ShotXYmm,
             ShotXYmoa,
         },
-        ShotMarkerShotString,
-        ShotMarkerStringMetrics,
     },
-    ShotMarkerExport,
 };
 
 #[cfg(test)]

@@ -1,8 +1,8 @@
 use nom::{
+    Parser,
     character::complete::multispace0,
     error::ParseError,
     sequence::delimited,
-    Parser,
 };
 
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and

@@ -8,12 +8,12 @@ use yew::{
     suspense::use_future,
 };
 use yew_nested_router::{
+    Target,
     components::Link,
     prelude::{
         Switch as RouterSwitch,
         *,
     },
-    Target,
 };
 
 use crate::app::leagues::LeagueRoute;

@@ -11,7 +11,9 @@ async fn main() -> Result<()> {
     let db_connection_str =
         std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite:league.db?mode=rwc".to_string());
     if std::env::var("RUST_LIB_BACKTRACE").is_err() {
-        std::env::set_var("RUST_LIB_BACKTRACE", "1");
+        unsafe {
+            std::env::set_var("RUST_LIB_BACKTRACE", "1");
+        }
     }
 
     let db_pool = SqlitePoolOptions::new()
