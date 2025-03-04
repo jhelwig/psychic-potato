@@ -5,7 +5,6 @@ use browser_panic_hook::{
     CustomBody,
     IntoPanicHook,
 };
-// use wasm_bindgen::prelude::*;
 
 mod app;
 

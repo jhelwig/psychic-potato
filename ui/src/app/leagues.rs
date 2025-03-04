@@ -1,10 +1,20 @@
+use std::borrow::Borrow;
+
 use anyhow::{
     Result,
     anyhow,
 };
 use gloo_net::http::Request;
+use log::{
+    debug,
+    error,
+    info,
+};
 use patternfly_yew::prelude::*;
-use shared_types::response::League;
+use shared_types::{
+    request::LeagueOperation,
+    response::League,
+};
 use uuid::Uuid;
 use yew::{
     prelude::*,
@@ -30,6 +40,7 @@ pub enum LeagueRoute {
     #[default]
     #[target(index)]
     Details,
+    Create,
     Matches,
     #[target(rename = "matches")]
     Match {
@@ -58,7 +69,9 @@ impl LeagueRoute {
 pub fn leagues_nav_menu() -> Html {
     html_nested! {
         <>
-            <NavRouterItem<AppRoute> to={AppRoute::Leagues}>
+            <NavRouterItem<AppRoute>
+                to={AppRoute::Leagues { action: crate::app::LeaguesManagementRoute::Index}}
+            >
                 { "Leagues" }
             </NavRouterItem<AppRoute>>
         </>
@@ -107,6 +120,15 @@ fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
                         <Link<LeagueRoute> to={LeagueRoute::Matches}>
                             { format!("Link to {league_id} match list") }
                         </Link<LeagueRoute>>
+                    </Content>
+                </PageContent>
+            )
+        }
+        LeagueRoute::Create => {
+            html!(
+                <PageContent title="Create League">
+                    <Content>
+                        { format!("Create league.") }
                     </Content>
                 </PageContent>
             )
@@ -209,22 +231,36 @@ fn league_details(props: &LeagueDetailsProps) -> Html {
 #[function_component(LeagueList)]
 fn league_list() -> HtmlResult {
     let leagues_result = use_future(|| async { fetch_leagues().await })?;
-    let fake_league_id = Uuid::new_v4();
+    // let fake_league_id = Uuid::new_v4();
 
     let html_result = match &*leagues_result {
         Ok(l) => {
             let leagues = l.clone();
             html!(
                 <>
-                    <Link<AppRoute>
-                        to={AppRoute::League {
-                        league_id: fake_league_id,
-                        details: LeagueRoute::Details,
-                    }}
-                    >
-                        { format!("Link to {fake_league_id} route") }
-                    </Link<AppRoute>>
-                    <LeagueListTable {leagues} />
+                    // <Link<AppRoute>
+                    //     to={AppRoute::League {
+                    //     league_id: fake_league_id,
+                    //     details: LeagueRoute::Details,
+                    // }}
+                    // >
+                    //     { format!("Link to {fake_league_id} route") }
+                    // </Link<AppRoute>>
+                    <Content>
+                        <Scope<AppRoute,LeagueRoute> mapper={AppRoute::mapper_leagues_create}>
+                            <Link<LeagueRoute> to={LeagueRoute::Create}>
+                                <Button
+                                    variant={ButtonVariant::Primary}
+                                    label="New League"
+                                    icon={Icon::PlusCircle}
+                                    align={Align::Start}
+                                />
+                            </Link<LeagueRoute>>
+                        </Scope<AppRoute,LeagueRoute>>
+                    </Content>
+                    <Content>
+                        <LeagueListTable {leagues} />
+                    </Content>
                 </>
             )
         }
@@ -346,4 +382,147 @@ pub fn league_list_table(props: &LeagueListTableProps) -> Html {
             {entries}
         />
     }
+}
+
+#[function_component(CreateLeaguePanel)]
+pub fn create_league_panel() -> HtmlResult {
+    let league_name = use_state_eq(String::new);
+    let is_creating = use_state_eq(|| false);
+    let maybe_league: UseStateHandle<Option<Result<League, String>>> = use_state_eq(|| None);
+
+    let onchange = use_callback(league_name.clone(), |new_league_name, league_name| {
+        league_name.set(new_league_name);
+    });
+
+    let toaster = use_toaster();
+
+    let onsubmit = {
+        let league_name = league_name.clone();
+        let is_creating = is_creating.setter();
+        let maybe_league_setter = maybe_league.setter();
+
+        Callback::from(move |event: SubmitEvent| {
+            event.prevent_default();
+            is_creating.set(true);
+
+            // Create league using league_name
+            let league_operation = LeagueOperation::Create {
+                league_name: (*league_name).clone(),
+            };
+
+            let spawned_league_name = league_name.clone();
+            let spawned_maybe_league_setter = maybe_league_setter.clone();
+            wasm_bindgen_futures::spawn_local(async move {
+                let response = match Request::post("/api/league/").json(&league_operation) {
+                    Ok(req) => req.send().await,
+                    Err(error) => {
+                        error!("Unable to set request body: {}", error);
+                        spawned_maybe_league_setter.set(Some(Err(error.to_string())));
+                        return;
+                    }
+                };
+                match response {
+                    Ok(response) => {
+                        if response.ok() {
+                            let league: League = match response.json().await {
+                                Ok(league) => {
+                                    spawned_league_name.set(String::new());
+                                    league
+                                }
+                                Err(error) => {
+                                    error!("Unable to parse response: {}", error);
+                                    spawned_maybe_league_setter.set(Some(Err(error.to_string())));
+                                    return;
+                                }
+                            };
+                            debug!("Created league: {league:?}");
+                            spawned_maybe_league_setter.set(Some(Ok(league)));
+                        } else {
+                            error!("Failed to create league: {}", response.status());
+                            let error_text = match response.text().await {
+                                Ok(text) => text,
+                                Err(error) => error.to_string(),
+                            };
+                            spawned_maybe_league_setter.set(Some(Err(format!(
+                                "{} {}: {error_text}",
+                                response.status(),
+                                response.status_text()
+                            ))));
+                        }
+                    }
+                    Err(error) => {
+                        error!("Error creating league: {}", error);
+                        spawned_maybe_league_setter.set(Some(Err(error.to_string())));
+                    }
+                }
+            });
+
+            is_creating.set(false);
+            // Navigate to league details page
+        })
+    };
+
+    use_effect_with(maybe_league.clone(), move |_| {
+        if let Some(toaster) = toaster.borrow() {
+            if let Some(league_result) = (*maybe_league).borrow() {
+                let (alert_type, title, body) = match league_result {
+                    Ok(league) => {
+                        (
+                            AlertType::Success,
+                            "League Created",
+                            format!("League {} created successfully.", league.name.clone()),
+                        )
+                    }
+                    Err(error) => {
+                        (
+                            AlertType::Danger,
+                            "Error Creating League",
+                            format!("An error occurred while creating the league. {error}"),
+                        )
+                    }
+                };
+
+                toaster.toast(Toast {
+                    title:   title.to_string(),
+                    r#type:  alert_type,
+                    timeout: None,
+                    body:    html!(
+                        <p>
+                            { body }
+                        </p>
+                    ),
+                    actions: Vec::new(),
+                });
+            }
+        }
+    });
+
+    let html_content = html!(
+        <PageContent title="Create League">
+            <Content>
+                <Form {onsubmit}>
+                    <FormGroup label="Legue Name" required=true>
+                        <TextInput
+                            placeholder="Enter league name"
+                            required=true
+                            autofocus=true
+                            value={(*league_name).clone()}
+                            {onchange}
+                        />
+                    </FormGroup>
+                    <ActionGroup>
+                        <Button
+                            variant={ButtonVariant::Primary}
+                            label="Submit"
+                            r#type={ButtonType::Submit}
+                            icon={Icon::PlusCircle}
+                            loading={*is_creating}
+                        />
+                    </ActionGroup>
+                </Form>
+            </Content>
+        </PageContent>
+    );
+
+    Ok(html_content)
 }

@@ -20,6 +20,7 @@ use crate::app::{
         AdminRoute,
     },
     leagues::{
+        CreateLeaguePanel,
         LeagueDetailsPanel,
         LeagueRoute,
         LeaguesPanel,
@@ -32,8 +33,10 @@ pub enum AppRoute {
     #[target(index)]
     Index,
     Admin(AdminRoute),
-    Leagues,
-    #[target(rename = "leagues")]
+    Leagues {
+        #[target(nested, default)]
+        action: LeaguesManagementRoute,
+    },
     League {
         league_id: Uuid,
         #[target(nested)]
@@ -61,6 +64,41 @@ impl AppRoute {
 
         Mapper::new(downwards, upwards)
     }
+
+    pub fn mapper_leagues_create(_: ()) -> Mapper<AppRoute, LeagueRoute> {
+        let downwards = |app_route| {
+            match app_route {
+                AppRoute::Leagues {
+                    action: LeaguesManagementRoute::Create,
+                } => Some(LeagueRoute::Create),
+                _ => None,
+            }
+        };
+        let upwards = move |league_route| {
+            match league_route {
+                LeagueRoute::Create => {
+                    AppRoute::Leagues {
+                        action: LeaguesManagementRoute::Create,
+                    }
+                }
+                _ => {
+                    AppRoute::Leagues {
+                        action: LeaguesManagementRoute::Index,
+                    }
+                }
+            }
+        };
+
+        Mapper::new(downwards, upwards)
+    }
+}
+
+#[derive(Debug, Default, Clone, PartialEq, Eq, Target)]
+pub enum LeaguesManagementRoute {
+    #[default]
+    #[target(index)]
+    Index,
+    Create,
 }
 
 #[function_component(App)]
@@ -107,8 +145,15 @@ fn switch_app_route(target: AppRoute) -> Html {
                 </Suspense>
             }
         }
-        AppRoute::Leagues => {
+        AppRoute::Leagues {
+            action: LeaguesManagementRoute::Index,
+        } => {
             html! { <LeaguesPanel /> }
+        }
+        AppRoute::Leagues {
+            action: LeaguesManagementRoute::Create,
+        } => {
+            html!(<CreateLeaguePanel />)
         }
         AppRoute::Admin(_) => {
             html! {

@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id AS \"id!: Uuid\",\n  league_name AS \"name!: String\",\n  created_at AS \"created_at!: DateTime<Utc>\"\nFROM leagues\nWHERE id = $1;\n",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: Uuid",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "name!: String",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at!: DateTime<Utc>",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "4e81c37de33f75c7ff07bd1cb6f301d647e4ca4eb4450cf08d7b9fdb073c32b4"
+}

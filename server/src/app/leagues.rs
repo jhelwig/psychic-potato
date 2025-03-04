@@ -1,4 +1,3 @@
-use anyhow::Context;
 use axum::{
     Json,
     Router,
@@ -89,11 +88,40 @@ pub async fn handle_league_operation(
         }
         LeagueOperation::Delete {
             id,
-        } => todo!(),
+        } => {
+            let maybe_league = sqlx::query_file_as!(League, "queries/leagues/get_league.sql", id)
+                .fetch_optional(&mut *txn)
+                .await?;
+            let Some(league) = maybe_league else {
+                return Err(LeagueError::NotFound {
+                    league_id: id,
+                }
+                .into());
+            };
+            sqlx::query_file!("queries/leagues/delete_league.sql", id).execute(&mut *txn).await?;
+
+            league
+        }
         LeagueOperation::SetName {
             id,
             league_name,
-        } => todo!(),
+        } => {
+            sqlx::query_file!("queries/leagues/set_name.sql", id, league_name)
+                .execute(&mut *txn)
+                .await?;
+            let maybe_league = sqlx::query_file_as!(League, "queries/leagues/get_league.sql", id)
+                .fetch_optional(&mut *txn)
+                .await?;
+
+            let Some(league) = maybe_league else {
+                return Err(LeagueError::NotFound {
+                    league_id: id,
+                }
+                .into());
+            };
+
+            league
+        }
     };
 
     txn.commit().await?;

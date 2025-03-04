@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM leagues\nWHERE id = $1;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "4e7b26d26c66d40d23b5499c3fdb0352185374be367b88e7e25a0073c35ea512"
+}
