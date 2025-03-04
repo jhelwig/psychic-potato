@@ -213,13 +213,7 @@ fn league_details(props: &LeagueDetailsProps) -> Html {
     } = &props.league;
 
     html! {
-        <PageContent title="League Details">
-            <Content>
-                { format!("ID: {id}") }
-            </Content>
-            <Content>
-                { format!("Name: {name}") }
-            </Content>
+        <PageContent title={name.clone()} subtitle={format!("Created: {created_at}")}>
             <Content>
                 { format!("Created: {created_at}") }
             </Content>
@@ -319,13 +313,16 @@ impl TableEntryRenderer<LeagueListTableColumn> for League {
     fn render_cell(&self, context: CellContext<'_, LeagueListTableColumn>) -> Cell {
         match context.column {
             LeagueListTableColumn::Id => html!(self.id.to_string()).into(),
-            LeagueListTableColumn::Name => html!(
-                <Link<AppRoute>
-                    to={AppRoute::League { league_id: self.id, details: LeagueRoute::Details, }}
-                >
-                    { self.name.clone() }
-                </Link<AppRoute>>
-            ).into(),
+            LeagueListTableColumn::Name => {
+                html!(
+                    <Link<AppRoute>
+                        to={AppRoute::League { league_id: self.id, details: LeagueRoute::Details, }}
+                    >
+                        { self.name.clone() }
+                    </Link<AppRoute>>
+                )
+                .into()
+            }
             LeagueListTableColumn::CreatedAt => {
                 html!(self.created_at.format("%Y-%m-%d %H:%M:%S")).into()
             }
