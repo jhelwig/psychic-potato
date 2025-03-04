@@ -8,7 +8,6 @@ use gloo_net::http::Request;
 use log::{
     debug,
     error,
-    info,
 };
 use patternfly_yew::prelude::*;
 use shared_types::{
@@ -470,27 +469,34 @@ pub fn create_league_panel() -> HtmlResult {
                         (
                             AlertType::Success,
                             "League Created",
-                            format!("League {} created successfully.", league.name.clone()),
+                            html!(
+                                { format!("League {} created successfully.", league.name.clone()) }
+                            ),
                         )
                     }
                     Err(error) => {
                         (
                             AlertType::Danger,
                             "Error Creating League",
-                            format!("An error occurred while creating the league. {error}"),
+                            html!(
+                                <>
+                                    <p>
+                                        { "An error occurred while creating the league." }
+                                    </p>
+                                    <p>
+                                        { error }
+                                    </p>
+                                </>
+                            ),
                         )
                     }
                 };
 
                 toaster.toast(Toast {
-                    title:   title.to_string(),
-                    r#type:  alert_type,
+                    title: title.to_string(),
+                    r#type: alert_type,
                     timeout: None,
-                    body:    html!(
-                        <p>
-                            { body }
-                        </p>
-                    ),
+                    body,
                     actions: Vec::new(),
                 });
             }
