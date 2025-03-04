@@ -388,6 +388,7 @@ pub fn create_league_panel() -> HtmlResult {
     let league_name = use_state_eq(String::new);
     let is_creating = use_state_eq(|| false);
     let maybe_league: UseStateHandle<Option<Result<League, String>>> = use_state_eq(|| None);
+    let maybe_router = use_router::<AppRoute>();
 
     let onchange = use_callback(league_name.clone(), |new_league_name, league_name| {
         league_name.set(new_league_name);
@@ -466,6 +467,14 @@ pub fn create_league_panel() -> HtmlResult {
             if let Some(league_result) = (*maybe_league).borrow() {
                 let (alert_type, title, body) = match league_result {
                     Ok(league) => {
+                        if let Some(router) = maybe_router {
+                            debug!("Navigating to league details page: {league:?}");
+                            router.push(AppRoute::League {
+                                league_id: league.id,
+                                details:   LeagueRoute::Details,
+                            });
+                        }
+
                         (
                             AlertType::Success,
                             "League Created",
