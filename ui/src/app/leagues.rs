@@ -413,7 +413,8 @@ pub fn create_league_panel() -> HtmlResult {
             let spawned_league_name = league_name.clone();
             let spawned_maybe_league_setter = maybe_league_setter.clone();
             wasm_bindgen_futures::spawn_local(async move {
-                let response = match Request::post("/api/league/").json(&league_operation) {
+                let response = match Request::post("/api/league/operation").json(&league_operation)
+                {
                     Ok(req) => req.send().await,
                     Err(error) => {
                         error!("Unable to set request body: {}", error);
