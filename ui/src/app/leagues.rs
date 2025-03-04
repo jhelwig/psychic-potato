@@ -319,7 +319,13 @@ impl TableEntryRenderer<LeagueListTableColumn> for League {
     fn render_cell(&self, context: CellContext<'_, LeagueListTableColumn>) -> Cell {
         match context.column {
             LeagueListTableColumn::Id => html!(self.id.to_string()).into(),
-            LeagueListTableColumn::Name => html!(self.name.clone()).into(),
+            LeagueListTableColumn::Name => html!(
+                <Link<AppRoute>
+                    to={AppRoute::League { league_id: self.id, details: LeagueRoute::Details, }}
+                >
+                    { self.name.clone() }
+                </Link<AppRoute>>
+            ).into(),
             LeagueListTableColumn::CreatedAt => {
                 html!(self.created_at.format("%Y-%m-%d %H:%M:%S")).into()
             }
@@ -356,11 +362,6 @@ pub fn league_list_table(props: &LeagueListTableProps) -> Html {
 
     let header = html_nested! {
         <TableHeader<LeagueListTableColumn>>
-            <TableColumn<LeagueListTableColumn>
-                label="ID"
-                index={LeagueListTableColumn::Id}
-                onsort={on_sort_by.clone()}
-            />
             <TableColumn<LeagueListTableColumn>
                 label="Name"
                 index={LeagueListTableColumn::Name}
