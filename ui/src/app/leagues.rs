@@ -481,7 +481,7 @@ pub fn create_league_panel() -> HtmlResult {
                             AlertType::Success,
                             "League Created",
                             html!(
-                                { format!("League {} created successfully.", league.name.clone()) }
+                                { format!("League \"{}\" created successfully.", league.name.clone()) }
                             ),
                         )
                     }
