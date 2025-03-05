@@ -6,7 +6,7 @@ use yew_nested_router::{
     prelude::*,
 };
 
-pub mod create_league_panel;
+pub mod league_create_panel;
 pub mod league_details_panel;
 pub mod league_list;
 pub mod league_panel;

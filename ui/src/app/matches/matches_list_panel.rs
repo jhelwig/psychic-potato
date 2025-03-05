@@ -1,10 +1,15 @@
+use std::rc::Rc;
+
 use anyhow::{
     Result,
     anyhow,
 };
 use gloo_net::http::Request;
 use patternfly_yew::prelude::*;
-use shared_types::response::Match;
+use shared_types::response::{
+    League,
+    Match,
+};
 use uuid::Uuid;
 use yew::{
     prelude::*,
@@ -25,12 +30,12 @@ use crate::app::{
 
 #[derive(Debug, Clone, PartialEq, Properties)]
 pub struct MatchesListPanelProps {
-    pub league_id: Uuid,
+    pub league: Rc<League>,
 }
 
 #[function_component(MatchesListPanel)]
 pub fn matches_list_panel(props: &MatchesListPanelProps) -> Html {
-    let league_id = props.league_id;
+    let league = props.league.clone();
     html! {
         <>
             <Content>
@@ -47,7 +52,7 @@ pub fn matches_list_panel(props: &MatchesListPanelProps) -> Html {
             </Content>
             <Content>
                 <Suspense fallback={html!({"Loading match list..."})}>
-                    <MatchList {league_id} />
+                    <MatchList {league} />
                 </Suspense>
             </Content>
         </>
@@ -56,17 +61,18 @@ pub fn matches_list_panel(props: &MatchesListPanelProps) -> Html {
 
 #[derive(Debug, Clone, PartialEq, Properties)]
 pub struct MatchListProps {
-    pub league_id: Uuid,
+    pub league: Rc<League>,
 }
 
 #[function_component(MatchList)]
 pub fn match_list(props: &MatchListProps) -> HtmlResult {
-    let league_id = props.league_id;
+    let league = props.league.clone();
+    let league_id = league.id;
     let matches_result = use_future(|| async move { fetch_matches(league_id).await })?;
 
     let html_result = match &*matches_result {
         Ok(matches) => {
-            let matches = matches.clone();
+            let matches = Rc::new(matches.clone());
             html!(
                 <Scope<LeagueRoute,MatchRoute>
                     mapper={move |_| LeagueRoute::mapper_match(league_id)}
@@ -121,12 +127,12 @@ impl TableEntryRenderer<MatchListTableColumn> for Match {
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
 pub struct MatchListTableProps {
-    pub matches: Vec<Match>,
+    pub matches: Rc<Vec<Match>>,
 }
 
 #[function_component(MatchListTable)]
 pub fn match_list_table(props: &MatchListTableProps) -> Html {
-    let matches_data = use_state_eq(|| props.matches.clone());
+    let matches_data = use_state_eq(|| props.matches.as_ref().clone());
 
     let on_sort_by = {
         let matches_data = matches_data.clone();

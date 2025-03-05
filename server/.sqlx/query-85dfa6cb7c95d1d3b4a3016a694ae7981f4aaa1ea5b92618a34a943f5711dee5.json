@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO matches (id, league_id, match_name, event_date)\nVALUES ($1, $2, $3, $4);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "85dfa6cb7c95d1d3b4a3016a694ae7981f4aaa1ea5b92618a34a943f5711dee5"
+}

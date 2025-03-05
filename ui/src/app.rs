@@ -22,7 +22,7 @@ use crate::app::{
     leagues::{
         LeagueRoute,
         LeaguesRoute,
-        create_league_panel::CreateLeaguePanel,
+        league_create_panel::CreateLeaguePanel,
         league_panel::LeaguePanel,
         leagues_panel::LeaguesPanel,
     },

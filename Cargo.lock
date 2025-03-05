@@ -3273,6 +3273,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "browser-panic-hook",
+ "chrono",
  "gloo-net 0.6.0",
  "gloo-utils 0.2.0",
  "log",

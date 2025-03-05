@@ -26,12 +26,11 @@ pub fn create_league_panel() -> HtmlResult {
     let is_creating = use_state_eq(|| false);
     let maybe_league: UseStateHandle<Option<Result<League, String>>> = use_state_eq(|| None);
     let maybe_router = use_router::<AppRoute>();
+    let toaster = use_toaster();
 
     let onchange = use_callback(league_name.clone(), |new_league_name, league_name| {
         league_name.set(new_league_name);
     });
-
-    let toaster = use_toaster();
 
     let onsubmit = {
         let league_name = league_name.clone();
@@ -96,7 +95,6 @@ pub fn create_league_panel() -> HtmlResult {
             });
 
             is_creating.set(false);
-            // Navigate to league details page
         })
     };
 

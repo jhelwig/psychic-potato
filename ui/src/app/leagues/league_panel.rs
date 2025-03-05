@@ -1,5 +1,4 @@
 use log::info;
-use patternfly_yew::prelude::*;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_nested_router::prelude::{
@@ -9,12 +8,14 @@ use yew_nested_router::prelude::{
 
 use crate::app::{
     AppRoute,
-    PageContent,
     leagues::{
         LeagueRoute,
         league_details_panel::LeagueDetailsPanel,
     },
-    matches::matches_panel::MatchesPanel,
+    matches::{
+        match_details_panel::MatchDetailsPanel,
+        matches_panel::MatchesPanel,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
@@ -51,19 +52,7 @@ pub fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
             ..
         } => {
             info!("Switching to MatchPanel");
-            html!(
-                <PageContent
-                    title={format!("League {league_id}")}
-                    subtitle={format!("Match {match_id}")}
-                >
-                    <Content>
-                        { format!("League: {league_id}") }
-                    </Content>
-                    <Content>
-                        { format!("Match: {match_id}") }
-                    </Content>
-                </PageContent>
-            )
+            html!(<MatchDetailsPanel {league_id} {match_id} />)
         }
     };
 

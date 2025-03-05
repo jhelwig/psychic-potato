@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use anyhow::{
     Result,
     anyhow,
@@ -27,7 +29,10 @@ pub fn league_details_panel(props: &LeagueDetailsPanelProps) -> HtmlResult {
     let league_result = use_future(|| async move { fetch_league(league_id).await })?;
 
     let html_result = match &*league_result {
-        Ok(league) => html!(<LeagueDetails league={league.clone()} />),
+        Ok(league) => {
+            let league = Rc::new(league.clone());
+            html!(<LeagueDetails {league} />)
+        }
         Err(e) => {
             html!(
                 <Content>
@@ -57,23 +62,20 @@ async fn fetch_league(league_id: Uuid) -> Result<League> {
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
 pub struct LeagueDetailsProps {
-    pub league: League,
+    pub league: Rc<League>,
 }
 
 #[function_component(LeagueDetails)]
 pub fn league_details(props: &LeagueDetailsProps) -> Html {
-    let League {
-        id,
-        name,
-        created_at,
-    } = &props.league;
+    let league = props.league.clone();
 
-    let league_id = *id;
+    let league_name = league.name.clone();
+    let league_created_at = league.created_at;
     html! {
-        <PageContent title={name.clone()} subtitle={format!("Created: {created_at}")}>
+        <PageContent title={league_name} subtitle={format!("Created: {league_created_at}")}>
             <Content>
                 <Suspense fallback={html!({"Loading match list..."})}>
-                    <MatchesListPanel {league_id} />
+                    <MatchesListPanel {league} />
                 </Suspense>
             </Content>
         </PageContent>

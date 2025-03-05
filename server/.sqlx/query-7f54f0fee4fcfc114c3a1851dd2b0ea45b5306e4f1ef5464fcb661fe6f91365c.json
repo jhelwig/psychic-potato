@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id AS \"id!: uuid::Uuid\",\n  match_name AS \"name!: String\",\n  event_date AS \"event_date!: NaiveDate\"\nFROM matches\nORDER BY event_date\n",
+  "query": "SELECT id AS \"id!: uuid::Uuid\",\n  match_name AS \"name!: String\",\n  event_date AS \"event_date!: NaiveDate\"\nFROM matches\nWHERE league_id = $1\n  AND id = $2\n",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       }
     ],
     "parameters": {
-      "Right": 0
+      "Right": 2
     },
     "nullable": [
       true,
@@ -28,5 +28,5 @@
       true
     ]
   },
-  "hash": "57320f40485fe9e8df2de2d85b57ead52b8ba1ee00c0f41188e5da8ccb0677d0"
+  "hash": "7f54f0fee4fcfc114c3a1851dd2b0ea45b5306e4f1ef5464fcb661fe6f91365c"
 }

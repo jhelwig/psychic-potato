@@ -10,7 +10,10 @@ use crate::app::{
         LeagueRoute,
         league_details_panel::LeagueDetailsPanel,
     },
-    matches::MatchesRoute,
+    matches::{
+        MatchesRoute,
+        matches_create_panel::MatchesCreatePanel,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Properties)]
@@ -37,7 +40,7 @@ pub fn switch_matches_panel(league_id: Uuid, target: MatchesRoute) -> Html {
         MatchesRoute::Index => {
             html!(<LeagueDetailsPanel {league_id} />)
         }
-        MatchesRoute::Create => html!({ format!("Create match for league: {league_id}") }),
+        MatchesRoute::Create => html!(<MatchesCreatePanel {league_id} />),
     };
 
     html!({ route })
