@@ -14,11 +14,10 @@ use shared_types::{
 use yew::prelude::*;
 use yew_nested_router::prelude::*;
 
-use super::LeagueRoute;
-
 use crate::app::{
     AppRoute,
     PageContent,
+    leagues::LeagueRoute,
 };
 
 #[function_component(CreateLeaguePanel)]
@@ -108,9 +107,10 @@ pub fn create_league_panel() -> HtmlResult {
                     Ok(league) => {
                         if let Some(router) = maybe_router {
                             debug!("Navigating to league details page: {league:?}");
+                            let league_id = league.id;
                             router.push(AppRoute::League {
-                                league_id: league.id,
-                                details:   LeagueRoute::Details,
+                                league_id,
+                                page: LeagueRoute::Details,
                             });
                         }
 

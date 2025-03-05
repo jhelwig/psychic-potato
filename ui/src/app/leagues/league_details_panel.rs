@@ -10,15 +10,10 @@ use yew::{
     prelude::*,
     suspense::use_future,
 };
-use yew_nested_router::prelude::*;
 
 use crate::app::{
     PageContent,
-    leagues::LeagueRoute,
-    matches::{
-        MatchesRoute,
-        matches_panel::MatchesListPanel,
-    },
+    matches::matches_list_panel::MatchesListPanel,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
@@ -78,11 +73,7 @@ pub fn league_details(props: &LeagueDetailsProps) -> Html {
         <PageContent title={name.clone()} subtitle={format!("Created: {created_at}")}>
             <Content>
                 <Suspense fallback={html!({"Loading match list..."})}>
-                    <Scope<LeagueRoute,MatchesRoute>
-                        mapper={move |_| { LeagueRoute::mapper_matches(league_id) }}
-                    >
-                        <MatchesListPanel {league_id} />
-                    </Scope<LeagueRoute,MatchesRoute>>
+                    <MatchesListPanel {league_id} />
                 </Suspense>
             </Content>
         </PageContent>

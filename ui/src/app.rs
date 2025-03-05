@@ -21,8 +21,9 @@ use crate::app::{
     },
     leagues::{
         LeagueRoute,
+        LeaguesRoute,
         create_league_panel::CreateLeaguePanel,
-        league_details_panel::LeagueDetailsPanel,
+        league_panel::LeaguePanel,
         leagues_panel::LeaguesPanel,
     },
 };
@@ -33,72 +34,34 @@ pub enum AppRoute {
     #[target(index)]
     Index,
     Admin(AdminRoute),
-    Leagues {
-        #[target(nested, default)]
-        action: LeaguesManagementRoute,
-    },
     League {
         league_id: Uuid,
-        #[target(nested)]
-        details:   LeagueRoute,
+        #[target(nested, default)]
+        page:      LeagueRoute,
     },
+    Leagues(LeaguesRoute),
 }
 
 impl AppRoute {
     pub fn mapper_league(league_id: Uuid) -> Mapper<AppRoute, LeagueRoute> {
-        let downwards = |page| {
-            match page {
-                AppRoute::League {
-                    details,
-                    ..
-                } => Some(details),
-                _ => None,
-            }
-        };
-        let upwards = move |d| {
-            AppRoute::League {
-                league_id,
-                details: d,
-            }
-        };
-
-        Mapper::new(downwards, upwards)
-    }
-
-    pub fn mapper_leagues(_: ()) -> Mapper<AppRoute, LeagueRoute> {
         let downwards = |app_route| {
             match app_route {
-                AppRoute::Leagues {
-                    action: LeaguesManagementRoute::Create,
-                } => Some(LeagueRoute::Create),
+                AppRoute::League {
+                    page,
+                    ..
+                } => Some(page),
                 _ => None,
             }
         };
         let upwards = move |league_route| {
-            match league_route {
-                LeagueRoute::Create => {
-                    AppRoute::Leagues {
-                        action: LeaguesManagementRoute::Create,
-                    }
-                }
-                _ => {
-                    AppRoute::Leagues {
-                        action: LeaguesManagementRoute::Index,
-                    }
-                }
+            AppRoute::League {
+                league_id,
+                page: league_route,
             }
         };
 
         Mapper::new(downwards, upwards)
     }
-}
-
-#[derive(Debug, Default, Clone, PartialEq, Eq, Target)]
-pub enum LeaguesManagementRoute {
-    #[default]
-    #[target(index)]
-    Index,
-    Create,
 }
 
 #[function_component(App)]
@@ -144,20 +107,16 @@ fn switch_app_route(target: AppRoute) -> Html {
                     <Scope<AppRoute,LeagueRoute>
                         mapper={move |_| { AppRoute::mapper_league(league_id) }}
                     >
-                        <LeagueDetailsPanel {league_id} />
+                        <LeaguePanel {league_id} />
                     </Scope<AppRoute,LeagueRoute>>
                 </Suspense>
             }
         }
-        AppRoute::Leagues {
-            action: LeaguesManagementRoute::Index,
-        } => {
-            html! { <LeaguesPanel /> }
-        }
-        AppRoute::Leagues {
-            action: LeaguesManagementRoute::Create,
-        } => {
+        AppRoute::Leagues(LeaguesRoute::Create) => {
             html!(<CreateLeaguePanel />)
+        }
+        AppRoute::Leagues(LeaguesRoute::Index) => {
+            html! { <LeaguesPanel /> }
         }
         AppRoute::Admin(_) => {
             html! {

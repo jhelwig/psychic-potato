@@ -13,7 +13,10 @@ use yew_nested_router::{
 
 use crate::app::{
     AppRoute,
-    leagues::LeagueRoute,
+    leagues::{
+        LeagueRoute,
+        LeaguesRoute,
+    },
 };
 
 #[function_component(LeagueList)]
@@ -28,16 +31,16 @@ pub fn league_list() -> HtmlResult {
             html!(
                 <>
                     <Content>
-                        <Scope<AppRoute,LeagueRoute> mapper={AppRoute::mapper_leagues}>
-                            <Link<LeagueRoute> to={LeagueRoute::Create}>
+                        <Scope<AppRoute,LeaguesRoute> mapper={AppRoute::mapper_leagues}>
+                            <Link<LeaguesRoute> to={LeaguesRoute::Create}>
                                 <Button
                                     variant={ButtonVariant::Primary}
                                     label="New League"
                                     icon={Icon::PlusCircle}
                                     align={Align::Start}
                                 />
-                            </Link<LeagueRoute>>
-                        </Scope<AppRoute,LeagueRoute>>
+                            </Link<LeaguesRoute>>
+                        </Scope<AppRoute,LeaguesRoute>>
                     </Content>
                     <Content>
                         <LeagueListTable {leagues} />
@@ -83,7 +86,7 @@ impl TableEntryRenderer<LeagueListTableColumn> for League {
             LeagueListTableColumn::Name => {
                 html!(
                     <Link<AppRoute>
-                        to={AppRoute::League { league_id: self.id, details: LeagueRoute::Details, }}
+                        to={AppRoute::League { league_id: self.id, page: LeagueRoute::Details}}
                     >
                         { self.name.clone() }
                     </Link<AppRoute>>

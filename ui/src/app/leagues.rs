@@ -14,67 +14,48 @@ pub mod leagues_panel;
 
 use crate::app::{
     AppRoute,
-    matches::MatchesRoute,
+    matches::{
+        MatchRoute,
+        MatchesRoute,
+    },
 };
 
-#[derive(Debug, Default, Clone, PartialEq, Eq, Target)]
-pub enum LeagueRoute {
-    #[default]
-    #[target(index)]
-    Details,
-    Create,
-    Matches {
-        #[target(nested, default)]
-        action: MatchesManagementRoute,
-    },
-    Match {
-        match_id: Uuid,
-    },
-}
-
-#[derive(Debug, Default, Clone, PartialEq, Eq, Target)]
-pub enum MatchesManagementRoute {
+#[derive(Debug, Clone, Default, PartialEq, Eq, Target)]
+pub enum LeaguesRoute {
     #[default]
     #[target(index)]
     Index,
     Create,
 }
 
+#[derive(Debug, Clone, Default, PartialEq, Eq, Target)]
+pub enum LeagueRoute {
+    #[default]
+    #[target(index)]
+    Details,
+    Matches(MatchesRoute),
+    Match {
+        match_id: Uuid,
+        #[target(nested, default)]
+        page:     MatchRoute,
+    },
+}
+
 impl LeagueRoute {
-    pub fn mapper_matches(league_id: Uuid) -> Mapper<LeagueRoute, MatchesRoute> {
+    pub fn mapper_match(match_id: Uuid) -> Mapper<LeagueRoute, MatchRoute> {
         let downwards = move |page| {
             match page {
-                LeagueRoute::Matches {
-                    action: MatchesManagementRoute::Create,
-                } => {
-                    Some(MatchesRoute::Create {
-                        league_id,
-                    })
-                }
-                LeagueRoute::Matches {
+                LeagueRoute::Match {
+                    page,
                     ..
-                } => {
-                    Some(MatchesRoute::Matches {
-                        league_id,
-                    })
-                }
+                } => Some(page),
                 _ => None,
             }
         };
-        let upwards = move |matches_route| {
-            match matches_route {
-                MatchesRoute::Create {
-                    ..
-                } => {
-                    LeagueRoute::Matches {
-                        action: MatchesManagementRoute::Create,
-                    }
-                }
-                _ => {
-                    LeagueRoute::Matches {
-                        action: MatchesManagementRoute::Index,
-                    }
-                }
+        let upwards = move |page| {
+            LeagueRoute::Match {
+                match_id,
+                page,
             }
         };
 
@@ -85,14 +66,9 @@ impl LeagueRoute {
 pub fn leagues_nav_menu() -> Html {
     html_nested! {
         <>
-            <NavRouterItem<AppRoute>
-                to={AppRoute::Leagues { action: crate::app::LeaguesManagementRoute::Index}}
-            >
+            <NavRouterItem<AppRoute> to={AppRoute::Leagues(LeaguesRoute::Index)}>
                 { "Leagues" }
             </NavRouterItem<AppRoute>>
         </>
     }
 }
-
-#[function_component(Index)]
-fn leagues_index() -> Html { html!({ "Leagues Index Component." }) }

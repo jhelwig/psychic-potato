@@ -1,22 +1,20 @@
+use log::info;
 use patternfly_yew::prelude::*;
 use uuid::Uuid;
 use yew::prelude::*;
-use yew_nested_router::{
-    components::Link,
-    prelude::{
-        Switch as RouterSwitch,
-        *,
-    },
+use yew_nested_router::prelude::{
+    Switch as RouterSwitch,
+    *,
 };
 
 use crate::app::{
     AppRoute,
     PageContent,
-};
-
-use super::{
-    LeagueRoute,
-    MatchesManagementRoute,
+    leagues::{
+        LeagueRoute,
+        league_details_panel::LeagueDetailsPanel,
+    },
+    matches::matches_panel::MatchesPanel,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
@@ -29,7 +27,7 @@ pub fn league_panel(props: &LeaguePanelProps) -> Html {
     let league_id = props.league_id;
     html! {
         <>
-            <Scope<AppRoute,LeagueRoute> mapper={move |_| { AppRoute::mapper_league(league_id) }}>
+            <Scope<AppRoute,LeagueRoute> mapper={move |_| { AppRoute::mapper_league(league_id)}}>
                 <RouterSwitch<LeagueRoute>
                     render={move |target| { switch_league_panel(league_id, target)}}
                 />
@@ -41,58 +39,18 @@ pub fn league_panel(props: &LeaguePanelProps) -> Html {
 pub fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
     let route = match target {
         LeagueRoute::Details => {
-            html!(
-                <PageContent title={format!("League {league_id}")}>
-                    <Content>
-                        { format!("League {league_id} details.") }
-                    </Content>
-                    <Content>
-                        <Link<LeagueRoute>
-                            to={LeagueRoute::Matches { action: MatchesManagementRoute::Index}}
-                        >
-                            { format!("Link to {league_id} match list") }
-                        </Link<LeagueRoute>>
-                    </Content>
-                </PageContent>
-            )
+            info!("Switching to LeagueDetailsPanel");
+            html!(<LeagueDetailsPanel {league_id} />)
         }
-        LeagueRoute::Matches {
-            action: MatchesManagementRoute::Index,
-        } => {
-            let match_id = Uuid::new_v4();
-            html!(
-                <PageContent title={format!("League {league_id}")} subtitle="Matches">
-                    <Content>
-                        { format!("Matches for league: ") }
-                        <Link<AppRoute>
-                            to={AppRoute::League { league_id, details: LeagueRoute::Details}}
-                        >
-                            { league_id.to_string() }
-                            { "." }
-                        </Link<AppRoute>>
-                    </Content>
-                    <Content>
-                        <Link<LeagueRoute> to={LeagueRoute::Match { match_id  }}>
-                            { format!("Link to match {match_id}.") }
-                        </Link<LeagueRoute>>
-                    </Content>
-                </PageContent>
-            )
-        }
-        LeagueRoute::Matches {
-            action: MatchesManagementRoute::Create,
-        } => {
-            html!(
-                <PageContent title="Create Match">
-                    <Content>
-                        { format!("Create match for league: {league_id}") }
-                    </Content>
-                </PageContent>
-            )
+        LeagueRoute::Matches(_) => {
+            info!("Switching to MatchesPanel");
+            html!(<MatchesPanel {league_id} />)
         }
         LeagueRoute::Match {
             match_id,
+            ..
         } => {
+            info!("Switching to MatchPanel");
             html!(
                 <PageContent
                     title={format!("League {league_id}")}
@@ -105,15 +63,6 @@ pub fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
                         { format!("Match: {match_id}") }
                     </Content>
                 </PageContent>
-            )
-        }
-        LeagueRoute::Create => {
-            html!(
-                <AlertGroup>
-                    <Alert title="How did you get here?" r#type={AlertType::Danger}>
-                        { "You've tried to access the create league page through the league panel, but that's not possible." }
-                    </Alert>
-                </AlertGroup>
             )
         }
     };
