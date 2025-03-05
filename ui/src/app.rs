@@ -65,7 +65,7 @@ impl AppRoute {
         Mapper::new(downwards, upwards)
     }
 
-    pub fn mapper_leagues_create(_: ()) -> Mapper<AppRoute, LeagueRoute> {
+    pub fn mapper_leagues(_: ()) -> Mapper<AppRoute, LeagueRoute> {
         let downwards = |app_route| {
             match app_route {
                 AppRoute::Leagues {

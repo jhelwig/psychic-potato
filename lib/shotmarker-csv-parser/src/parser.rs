@@ -53,7 +53,7 @@ use crate::{
 
 #[cfg(test)]
 mod tests;
-pub(crate) mod util;
+pub mod util;
 
 pub fn export_parser(input: &str) -> IResult<&str, ShotMarkerExport> {
     let (rest, _) =

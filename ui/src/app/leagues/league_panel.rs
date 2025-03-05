@@ -38,7 +38,7 @@ pub fn league_panel(props: &LeaguePanelProps) -> Html {
     }
 }
 
-pub(crate) fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
+pub fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
     let route = match target {
         LeagueRoute::Details => {
             html!(
@@ -52,15 +52,6 @@ pub(crate) fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html 
                         >
                             { format!("Link to {league_id} match list") }
                         </Link<LeagueRoute>>
-                    </Content>
-                </PageContent>
-            )
-        }
-        LeagueRoute::Create => {
-            html!(
-                <PageContent title="Create League">
-                    <Content>
-                        { format!("Create league.") }
                     </Content>
                 </PageContent>
             )
@@ -114,6 +105,15 @@ pub(crate) fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html 
                         { format!("Match: {match_id}") }
                     </Content>
                 </PageContent>
+            )
+        }
+        LeagueRoute::Create => {
+            html!(
+                <AlertGroup>
+                    <Alert title="How did you get here?" r#type={AlertType::Danger}>
+                        { "You've tried to access the create league page through the league panel, but that's not possible." }
+                    </Alert>
+                </AlertGroup>
             )
         }
     };

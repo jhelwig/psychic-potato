@@ -95,7 +95,4 @@ pub fn leagues_nav_menu() -> Html {
 }
 
 #[function_component(Index)]
-fn leagues_index() -> Html {
-    // lsdkjlfdsjk
-    html!({ "Leagues Index Component." })
-}
+fn leagues_index() -> Html { html!({ "Leagues Index Component." }) }

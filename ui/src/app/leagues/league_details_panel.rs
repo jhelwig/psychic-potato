@@ -61,12 +61,12 @@ async fn fetch_league(league_id: Uuid) -> Result<League> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
-pub(crate) struct LeagueDetailsProps {
+pub struct LeagueDetailsProps {
     pub league: League,
 }
 
 #[function_component(LeagueDetails)]
-pub(crate) fn league_details(props: &LeagueDetailsProps) -> Html {
+pub fn league_details(props: &LeagueDetailsProps) -> Html {
     let League {
         id,
         name,

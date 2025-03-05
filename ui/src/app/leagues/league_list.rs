@@ -17,7 +17,7 @@ use crate::app::{
 };
 
 #[function_component(LeagueList)]
-pub(crate) fn league_list() -> HtmlResult {
+pub fn league_list() -> HtmlResult {
     let use_future = use_future(|| async { fetch_leagues().await })?;
     let leagues_result = use_future;
     // let fake_league_id = Uuid::new_v4();
@@ -28,7 +28,7 @@ pub(crate) fn league_list() -> HtmlResult {
             html!(
                 <>
                     <Content>
-                        <Scope<AppRoute,LeagueRoute> mapper={AppRoute::mapper_leagues_create}>
+                        <Scope<AppRoute,LeagueRoute> mapper={AppRoute::mapper_leagues}>
                             <Link<LeagueRoute> to={LeagueRoute::Create}>
                                 <Button
                                     variant={ButtonVariant::Primary}
