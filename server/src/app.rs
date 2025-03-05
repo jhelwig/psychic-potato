@@ -71,8 +71,6 @@ pub fn build(app_state: AppState) -> Router {
         .layer(CorsLayer::permissive());
 
     Router::new()
-        .nest("/exports", export::router(app_state.clone()))
-        .nest("/match", matches::router(app_state.clone()))
         .nest("/league", leagues::router(app_state.clone()))
         .layer(service_builder)
         .with_state(app_state)
