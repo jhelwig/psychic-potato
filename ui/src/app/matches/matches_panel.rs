@@ -10,6 +10,9 @@ use yew::{
     prelude::*,
     suspense::use_future,
 };
+use yew_nested_router::components::Link;
+
+use crate::app::matches::MatchesRoute;
 
 #[derive(Debug, Clone, PartialEq, Properties)]
 pub struct MatchesPanelProps {
@@ -22,13 +25,14 @@ pub fn matches_panel(props: &MatchesPanelProps) -> Html {
     html! {
         <>
             <Content>
-                <Button
-                    variant={ButtonVariant::Primary}
-                    label="Create Match"
-                    icon={Icon::PlusCircle}
-                    align={Align::Start}
-                />
-                // </Link<MatchesRoute>>
+                <Link<MatchesRoute> to={MatchesRoute::Create { league_id }}>
+                    <Button
+                        variant={ButtonVariant::Primary}
+                        label="Create Match"
+                        icon={Icon::PlusCircle}
+                        align={Align::Start}
+                    />
+                </Link<MatchesRoute>>
             </Content>
             <Content>
                 <Suspense fallback={html!({"Loading match list..."})}>

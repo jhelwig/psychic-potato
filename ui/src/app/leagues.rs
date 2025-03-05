@@ -9,7 +9,6 @@ use yew_nested_router::{
 pub mod create_league_panel;
 pub mod league_details_panel;
 pub mod league_list;
-pub mod league_match_list;
 pub mod league_panel;
 pub mod leagues_panel;
 
@@ -46,31 +45,16 @@ impl LeagueRoute {
         let downwards = move |page| {
             match page {
                 LeagueRoute::Matches {
-                    ..
-                } => {
-                    Some(MatchesRoute::Matches {
-                        league_id,
-                    })
-                }
-                _ => None,
-            }
-        };
-        let upwards = move |_| {
-            LeagueRoute::Matches {
-                action: MatchesManagementRoute::Index,
-            }
-        };
-
-        Mapper::new(downwards, upwards)
-    }
-
-    pub fn mapper_match_create(league_id: Uuid) -> Mapper<LeagueRoute, MatchesRoute> {
-        let downwards = move |page| {
-            match page {
-                LeagueRoute::Matches {
                     action: MatchesManagementRoute::Create,
                 } => {
                     Some(MatchesRoute::Create {
+                        league_id,
+                    })
+                }
+                LeagueRoute::Matches {
+                    ..
+                } => {
+                    Some(MatchesRoute::Matches {
                         league_id,
                     })
                 }
