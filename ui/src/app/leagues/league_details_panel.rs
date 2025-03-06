@@ -45,7 +45,7 @@ pub fn league_details_panel(props: &LeagueDetailsPanelProps) -> HtmlResult {
     Ok(html_result)
 }
 
-async fn fetch_league(league_id: Uuid) -> Result<League> {
+pub async fn fetch_league(league_id: Uuid) -> Result<League> {
     let response = Request::get(&format!("/api/league/{league_id}")).send().await?;
     let league: League = if response.ok() {
         response.json().await?

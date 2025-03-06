@@ -25,6 +25,7 @@ use crate::app::{
     matches::{
         MatchRoute,
         MatchesRoute,
+        fetch_matches,
     },
 };
 
@@ -93,21 +94,6 @@ pub fn match_list(props: &MatchListProps) -> HtmlResult {
     Ok(html_result)
 }
 
-async fn fetch_matches(league_id: Uuid) -> Result<Vec<Match>> {
-    let response = Request::get(&format!("/api/league/{league_id}/match")).send().await?;
-    let matches = if response.ok() {
-        response.json().await?
-    } else {
-        return Err(anyhow!(
-            "Failed to fetch matches for league {league_id}: {}\n{}",
-            response.status(),
-            response.text().await?,
-        ));
-    };
-
-    Ok(matches)
-}
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum MatchListTableColumn {
     Id,
@@ -119,7 +105,16 @@ impl TableEntryRenderer<MatchListTableColumn> for Match {
     fn render_cell(&self, context: CellContext<'_, MatchListTableColumn>) -> Cell {
         match context.column {
             MatchListTableColumn::Id => html!(self.id.to_string()).into(),
-            MatchListTableColumn::Name => html!(self.name.clone()).into(),
+            MatchListTableColumn::Name => {
+                html!(
+                    <Link<LeagueRoute>
+                        to={LeagueRoute::Match { match_id: self.id, page: MatchRoute::Details}}
+                    >
+                        { self.name.clone() }
+                    </Link<LeagueRoute>>
+                )
+                .into()
+            }
             MatchListTableColumn::EventDate => html!(self.event_date.to_string()).into(),
         }
     }
@@ -157,11 +152,6 @@ pub fn match_list_table(props: &MatchListTableProps) -> Html {
 
     let header = html_nested!(
         <TableHeader<MatchListTableColumn>>
-            <TableColumn<MatchListTableColumn>
-                label="ID"
-                index={MatchListTableColumn::Id}
-                onsort={on_sort_by.clone()}
-            />
             <TableColumn<MatchListTableColumn>
                 label="Name"
                 index={MatchListTableColumn::Name}

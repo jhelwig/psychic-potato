@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE matches\nSET event_date = $3\nWHERE league_id = $1\n  AND id = $2;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "801915eac67aa6b48d269065912d66924cb054625e2b5040c0d58394e7db5c8c"
+}

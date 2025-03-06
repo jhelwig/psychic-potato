@@ -41,18 +41,30 @@ pub fn switch_league_panel(league_id: Uuid, target: LeagueRoute) -> Html {
     let route = match target {
         LeagueRoute::Details => {
             info!("Switching to LeagueDetailsPanel");
-            html!(<LeagueDetailsPanel {league_id} />)
+            html!(
+                <Suspense fallback="Loading...">
+                    <LeagueDetailsPanel {league_id} />
+                </Suspense>
+            )
         }
         LeagueRoute::Matches(_) => {
             info!("Switching to MatchesPanel");
-            html!(<MatchesPanel {league_id} />)
+            html!(
+                <Suspense fallback="Loading...">
+                    <MatchesPanel {league_id} />
+                </Suspense>
+            )
         }
         LeagueRoute::Match {
             match_id,
             ..
         } => {
             info!("Switching to MatchPanel");
-            html!(<MatchDetailsPanel {league_id} {match_id} />)
+            html!(
+                <Suspense fallback="Loading...">
+                    <MatchDetailsPanel {league_id} {match_id} />
+                </Suspense>
+            )
         }
     };
 

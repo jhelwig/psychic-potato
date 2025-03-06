@@ -52,8 +52,7 @@ async fn list_league_matches(
 
 async fn get_league_match(
     DbTransaction(mut txn): DbTransaction<'_>,
-    Path(league_id): Path<Uuid>,
-    Path(match_id): Path<Uuid>,
+    Path((league_id, match_id)): Path<(Uuid, Uuid)>,
 ) -> Result<Json<Match>, AppError> {
     let result = sqlx::query_file_as!(Match, "queries/matches/get_match.sql", league_id, match_id)
         .fetch_optional(&mut *txn)
@@ -87,16 +86,38 @@ async fn handle_league_match_operation(
         }
         MatchOperation::Delete {
             id,
-        } => todo!(),
+        } => {
+            let match_object =
+                sqlx::query_file_as!(Match, "queries/matches/get_match.sql", league_id, id)
+                    .fetch_one(&mut *txn)
+                    .await?;
+            sqlx::query_file!("queries/matches/delete_match.sql", id).execute(&mut *txn).await?;
+            match_object
+        }
         MatchOperation::SetDate {
             id,
             event_date,
-        } => todo!(),
+        } => {
+            sqlx::query_file!("queries/matches/set_date.sql", league_id, id, event_date)
+                .execute(&mut *txn)
+                .await?;
+            sqlx::query_file_as!(Match, "queries/matches/get_match.sql", league_id, id)
+                .fetch_one(&mut *txn)
+                .await?
+        }
         MatchOperation::SetName {
             id,
             name,
-        } => todo!(),
+        } => {
+            sqlx::query_file!("queries/matches/set_name.sql", league_id, id, name)
+                .execute(&mut *txn)
+                .await?;
+            sqlx::query_file_as!(Match, "queries/matches/get_match.sql", league_id, id)
+                .fetch_one(&mut *txn)
+                .await?
+        }
     };
 
+    txn.commit().await?;
     Ok(Json(result))
 }
