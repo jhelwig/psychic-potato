@@ -1,7 +1,10 @@
 use std::borrow::Borrow;
 
 use anyhow::Result;
-use chrono::NaiveDate;
+use chrono::{
+    NaiveDate,
+    Utc,
+};
 use gloo_net::http::Request;
 use log::{
     debug,
@@ -31,14 +34,21 @@ pub struct MatchesCreatePanelProps {
 pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
     let league_id = props.league_id;
     let match_name = use_state_eq(String::new);
+    let match_date = use_state_eq(|| None);
     let is_creating = use_state_eq(|| false);
     let maybe_match: UseStateHandle<Option<Result<Match, String>>> = use_state_eq(|| None);
+    let datepicker_state = use_state_eq(|| None);
     let maybe_router = use_router::<LeagueRoute>();
     let toaster = use_toaster();
 
-    let onchange = use_callback(match_name.clone(), |new_match_name, match_name| {
+    let match_name_onchange = use_callback(match_name.clone(), |new_match_name, match_name| {
         match_name.set(new_match_name);
     });
+
+    let datepicker_onchange =
+        use_callback(datepicker_state.clone(), |new_datepicker_state, datepicker_state| {
+            datepicker_state.set(Some(new_datepicker_state));
+        });
 
     let onsubmit = {
         let match_name = match_name.clone();
@@ -52,7 +62,7 @@ pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
             // Create match using match_name
             let match_operation = MatchOperation::Create {
                 name:       (*match_name).clone(),
-                event_date: NaiveDate::default(),
+                event_date: (*match_date).unwrap_or_else(|| Utc::now().naive_local().date()),
             };
             let spawned_match_name = match_name.clone();
             let spawned_maybe_match_setter = maybe_match_setter.clone();
@@ -172,8 +182,11 @@ pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
                             required=true
                             autofocus=true
                             value={(*match_name).clone()}
-                            {onchange}
+                            onchange={match_name_onchange}
                         />
+                    </FormGroup>
+                    <FormGroup label="Event Date">
+                        <DatePicker onchange={datepicker_onchange} value={*datepicker_state} />
                     </FormGroup>
                     <ActionGroup>
                         <Button
