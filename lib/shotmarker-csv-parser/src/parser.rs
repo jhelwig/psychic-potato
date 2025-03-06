@@ -55,7 +55,12 @@ use crate::{
 mod tests;
 pub mod util;
 
-pub fn export_parser(input: &str) -> IResult<&str, ShotMarkerExport> {
+pub fn export_parser(
+    input: &str,
+) -> Result<(&str, ShotMarkerExport), nom::Err<nom::error::Error<String>>> {
+    export_parser_inner(input).map_err(|e| e.to_owned())
+}
+fn export_parser_inner(input: &str) -> IResult<&str, ShotMarkerExport> {
     let (rest, _) =
         context("Parsing start of export", ws(tag_no_case("ShotMarker Archived Data (generated")))
             .parse(input)?;
