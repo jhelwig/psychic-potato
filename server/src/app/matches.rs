@@ -36,6 +36,7 @@ pub fn league_match_router(app_state: AppState) -> Router<AppState> {
         .route("/", get(list_league_matches))
         .route("/{match_id}", get(get_league_match))
         .route("/operation", post(handle_league_match_operation))
+        .nest("/export", crate::app::export::router(app_state.clone()))
         .with_state(app_state)
 }
 

@@ -9,6 +9,7 @@ use axum::{
 };
 use chrono::{
     DateTime,
+    NaiveDate,
     Utc,
 };
 use shared_types::{
@@ -108,6 +109,14 @@ pub async fn handle_league_operation(
 
             league
         }
+        LeagueOperation::SetDescription {
+            id: _id,
+            description: _description,
+        } => todo!(),
+        LeagueOperation::SetEndDate {
+            id: _id,
+            end_date: _end_date,
+        } => todo!(),
         LeagueOperation::SetName {
             id,
             league_name,
@@ -128,6 +137,10 @@ pub async fn handle_league_operation(
 
             league
         }
+        LeagueOperation::SetStartDate {
+            id: _id,
+            start_date: _start_date,
+        } => todo!(),
     };
 
     txn.commit().await?;

@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id AS \"id!: Uuid\",\n  league_name AS \"name!: String\",\n  description AS \"description: String\",\n  start_date AS \"start_date: NaiveDate\",\n  end_date AS \"end_date: NaiveDate\",\n  created_at AS \"created_at!: DateTime<Utc>\"\nFROM leagues\nWHERE id = $1;\n",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: Uuid",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "name!: String",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "description: String",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "start_date: NaiveDate",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "end_date: NaiveDate",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "created_at!: DateTime<Utc>",
+        "ordinal": 5,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "082bc717f62b5111a11e35254ffdcdfd87331a5dbdee525ede98f8eac5b2cbb7"
+}

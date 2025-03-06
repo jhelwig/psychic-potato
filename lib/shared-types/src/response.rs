@@ -17,9 +17,12 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct League {
-    pub id:         Uuid,
-    pub name:       String,
-    pub created_at: DateTime<Utc>,
+    pub id:          Uuid,
+    pub name:        String,
+    pub description: Option<String>,
+    pub created_at:  DateTime<Utc>,
+    pub start_date:  Option<NaiveDate>,
+    pub end_date:    Option<NaiveDate>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
@@ -48,18 +51,36 @@ pub struct ShotMarkerShotString {
     pub distance:    String,
     pub score:       String,
     pub export_id:   Uuid,
+    pub shooter_id:  Option<Uuid>,
+    pub class_id:    Option<Uuid>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct ShotMarkerShot {
-    pub id:        Uuid,
-    pub shot_time: NaiveTime,
-    pub shot_id:   String,
-    pub tags:      String,
-    pub score:     ShotScore,
-    pub position:  ShotPosition,
-    pub velocity:  ShotVelocity,
-    pub yaw:       f64,
-    pub pitch:     f64,
-    pub quality:   Option<String>,
+    pub id:             Uuid,
+    pub shot_time:      NaiveTime,
+    pub shot_id:        String,
+    pub tags:           String,
+    pub score:          ShotScore,
+    pub position:       ShotPosition,
+    pub velocity:       ShotVelocity,
+    pub yaw:            f64,
+    pub pitch:          f64,
+    pub quality:        Option<String>,
+    pub shot_string_id: Uuid,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Class {
+    pub id:          Uuid,
+    pub name:        String,
+    pub description: Option<String>,
+    pub league_id:   Uuid,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Shooter {
+    pub id:               Uuid,
+    pub name:             String,
+    pub default_class_id: Option<Uuid>,
 }

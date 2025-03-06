@@ -1,16 +1,10 @@
 use std::rc::Rc;
 
-use anyhow::{
-    Result,
-    anyhow,
-};
-use gloo_net::http::Request;
 use patternfly_yew::prelude::*;
 use shared_types::response::{
     League,
     Match,
 };
-use uuid::Uuid;
 use yew::{
     prelude::*,
     suspense::use_future,

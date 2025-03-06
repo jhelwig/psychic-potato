@@ -10,12 +10,20 @@ use yew::{
     prelude::*,
     suspense::use_future,
 };
-use yew_nested_router::prelude::*;
+use yew_nested_router::components::Link;
 
 use crate::app::{
+    AppRoute,
     PageContent,
-    leagues::league_details_panel::fetch_league,
-    matches::fetch_match,
+    leagues::{
+        LeagueRoute,
+        LeaguesRoute,
+        league_details_panel::fetch_league,
+    },
+    matches::{
+        MatchRoute,
+        fetch_match,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
@@ -69,10 +77,48 @@ pub fn match_details(props: &MatchDetailsProps) -> Html {
     let match_name = &props.match_object.name;
 
     html!(
-        <PageContent title={league_name.clone()} subtitle={match_name.clone()}>
-            <Content>
-                { "Match Details..." }
-            </Content>
-        </PageContent>
+        <>
+            <PageSection
+                r#type={PageSectionType::Breadcrumbs}
+                variant={PageSectionVariant::Default}
+                limit_width=true
+                sticky={[PageSectionSticky::Top]}
+            >
+                <Breadcrumb>
+                    <BreadcrumbItem>
+                        <Link<AppRoute> to={AppRoute::Index}>
+                            { "Home" }
+                        </Link<AppRoute>>
+                    </BreadcrumbItem>
+                    <BreadcrumbItem>
+                        <Link<AppRoute> to={AppRoute::Leagues(LeaguesRoute::Index)}>
+                            { "Leagues" }
+                        </Link<AppRoute>>
+                    </BreadcrumbItem>
+                    <BreadcrumbItem>
+                        <Link<AppRoute>
+                            to={AppRoute::League { league_id: props.league.id, page: LeagueRoute::Details }}
+                        >
+                            { league_name.clone() }
+                        </Link<AppRoute>>
+                    </BreadcrumbItem>
+                    <BreadcrumbItem>
+                        <Link<LeagueRoute>
+                            to={LeagueRoute::Match { match_id: props.match_object.id, page: MatchRoute::Details }}
+                        >
+                            { "Matches" }
+                        </Link<LeagueRoute>>
+                    </BreadcrumbItem>
+                    <BreadcrumbItem>
+                        { match_name.clone() }
+                    </BreadcrumbItem>
+                </Breadcrumb>
+            </PageSection>
+            <PageContent title={league_name.clone()} subtitle={match_name.clone()}>
+                <Content>
+                    { "Match Details..." }
+                </Content>
+            </PageContent>
+        </>
     )
 }

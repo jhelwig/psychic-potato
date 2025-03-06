@@ -14,9 +14,21 @@ pub enum LeagueOperation {
     Delete {
         id: Uuid,
     },
+    SetDescription {
+        id:          Uuid,
+        description: Option<String>,
+    },
+    SetEndDate {
+        id:       Uuid,
+        end_date: Option<NaiveDate>,
+    },
     SetName {
         id:          Uuid,
         league_name: String,
+    },
+    SetStartDate {
+        id:         Uuid,
+        start_date: Option<NaiveDate>,
     },
 }
 

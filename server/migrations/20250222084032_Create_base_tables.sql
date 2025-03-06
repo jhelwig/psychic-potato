@@ -1,7 +1,10 @@
 CREATE TABLE leagues (
   id TEXT PRIMARY KEY,
   league_name TEXT,
-  created_at TEXT
+  description TEXT,
+  created_at TEXT,
+  start_date TEXT,
+  end_date TEXT
 );
 
 CREATE TABLE matches (
@@ -9,6 +12,15 @@ CREATE TABLE matches (
   match_name TEXT,
   event_date TEXT,
   league_id TEXT REFERENCES leagues(id) ON
+  DELETE CASCADE
+);
+
+CREATE TABLE shotmarker_export_files (
+  id TEXT PRIMARY KEY,
+  file_name TEXT,
+  contents TEXT,
+  uploaded_at TEXT,
+  export_id TEXT REFERENCES exports(id) ON
   DELETE CASCADE
 );
 
@@ -30,7 +42,13 @@ CREATE TABLE strings (
   distance TEXT,
   score TEXT,
   export_id TEXT REFERENCES exports(id) ON
-  DELETE CASCADE
+  DELETE CASCADE,
+    shooter_id TEXT REFERENCES shooters(id) ON
+  DELETE
+  SET NULL,
+    class_id TEXT REFERENCES classes(id) ON
+  DELETE
+  SET NULL
 );
 
 CREATE TABLE shots (
@@ -46,4 +64,20 @@ CREATE TABLE shots (
   quality TEXT,
   string_id TEXT REFERENCES strings(id) ON
   DELETE CASCADE
-)
+);
+
+CREATE TABLE classes (
+  id TEXT PRIMARY KEY,
+  class_name TEXT,
+  description TEXT,
+  league_id TEXT REFERENCES leagues(id) ON
+  DELETE CASCADE
+);
+
+CREATE TABLE shooters (
+  id TEXT PRIMARY KEY,
+  shooter_name TEXT,
+  default_class_id TEXT REFERENCES classes(id) ON
+  DELETE
+  SET NULL
+);
