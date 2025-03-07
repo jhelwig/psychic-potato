@@ -1,4 +1,10 @@
+use anyhow::{
+    Result,
+    anyhow,
+};
+use gloo_net::http::Request;
 use patternfly_yew::prelude::*;
+use shared_types::response::League;
 use uuid::Uuid;
 use yew::prelude::*;
 use yew_nested_router::{
@@ -18,27 +24,31 @@ use crate::app::{
         MatchRoute,
         MatchesRoute,
     },
+    shooters::ShootersRoute,
 };
 
+#[remain::sorted]
 #[derive(Debug, Clone, Default, PartialEq, Eq, Target)]
 pub enum LeaguesRoute {
+    Create,
     #[default]
     #[target(index)]
     Index,
-    Create,
 }
 
+#[remain::sorted]
 #[derive(Debug, Clone, Default, PartialEq, Eq, Target)]
 pub enum LeagueRoute {
     #[default]
     #[target(index)]
     Details,
-    Matches(MatchesRoute),
     Match {
         match_id: Uuid,
         #[target(nested, default)]
         page:     MatchRoute,
     },
+    Matches(MatchesRoute),
+    Shooters(ShootersRoute),
 }
 
 impl LeagueRoute {
@@ -71,4 +81,19 @@ pub fn leagues_nav_menu() -> Html {
             </NavRouterItem<AppRoute>>
         </>
     }
+}
+
+pub async fn fetch_league(league_id: Uuid) -> Result<League> {
+    let response = Request::get(&format!("/api/league/{league_id}")).send().await?;
+    let league: League = if response.ok() {
+        response.json().await?
+    } else {
+        return Err(anyhow!(
+            "Failed to fetch league: {}\n{}",
+            response.status(),
+            response.text().await?,
+        ));
+    };
+
+    Ok(league)
 }

@@ -1,10 +1,10 @@
-use std::borrow::Borrow;
+use std::{
+    borrow::Borrow,
+    rc::Rc,
+};
 
 use anyhow::Result;
-use chrono::{
-    NaiveDate,
-    Utc,
-};
+use chrono::Utc;
 use gloo_net::http::Request;
 use log::{
     debug,
@@ -13,9 +13,11 @@ use log::{
 use patternfly_yew::prelude::*;
 use shared_types::{
     request::MatchOperation,
-    response::Match,
+    response::{
+        League,
+        Match,
+    },
 };
-use uuid::Uuid;
 use yew::prelude::*;
 use yew_nested_router::prelude::*;
 
@@ -27,12 +29,12 @@ use crate::app::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
 pub struct MatchesCreatePanelProps {
-    pub league_id: Uuid,
+    pub league: Rc<League>,
 }
 
 #[function_component(MatchesCreatePanel)]
 pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
-    let league_id = props.league_id;
+    let league_id = props.league.id;
     let match_name = use_state_eq(String::new);
     let match_date = use_state_eq(|| None);
     let is_creating = use_state_eq(|| false);

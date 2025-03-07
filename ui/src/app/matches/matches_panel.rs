@@ -1,4 +1,6 @@
-use uuid::Uuid;
+use std::rc::Rc;
+
+use shared_types::response::League;
 use yew::prelude::*;
 use yew_nested_router::prelude::{
     Switch as RouterSwitch,
@@ -6,41 +8,39 @@ use yew_nested_router::prelude::{
 };
 
 use crate::app::{
-    leagues::{
-        LeagueRoute,
-        league_details_panel::LeagueDetailsPanel,
-    },
+    leagues::LeagueRoute,
     matches::{
         MatchesRoute,
         matches_create_panel::MatchesCreatePanel,
+        matches_list_panel::MatchesListPanel,
     },
 };
 
 #[derive(Debug, Clone, PartialEq, Properties)]
 pub struct MatchesPanelProps {
-    pub league_id: Uuid,
+    pub league: Rc<League>,
 }
 
 #[function_component(MatchesPanel)]
 pub fn matches_panel(props: &MatchesPanelProps) -> Html {
-    let league_id = props.league_id;
+    let league = props.league.clone();
     html! {
         <>
             <Scope<LeagueRoute,MatchesRoute> mapper={LeagueRoute::mapper_matches}>
                 <RouterSwitch<MatchesRoute>
-                    render={move |target| { switch_matches_panel(league_id, target)}}
+                    render={move |target| { switch_matches_panel(league.clone(), target)}}
                 />
             </Scope<LeagueRoute,MatchesRoute>>
         </>
     }
 }
 
-pub fn switch_matches_panel(league_id: Uuid, target: MatchesRoute) -> Html {
+pub fn switch_matches_panel(league: Rc<League>, target: MatchesRoute) -> Html {
     let route = match target {
         MatchesRoute::Index => {
-            html!(<LeagueDetailsPanel {league_id} />)
+            html!(<MatchesListPanel {league} />)
         }
-        MatchesRoute::Create => html!(<MatchesCreatePanel {league_id} />),
+        MatchesRoute::Create => html!(<MatchesCreatePanel {league} />),
     };
 
     html!({ route })
