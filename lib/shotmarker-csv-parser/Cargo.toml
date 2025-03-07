@@ -7,10 +7,10 @@ version.workspace = true
 publish.workspace = true
 
 [dependencies]
-chrono.workspace = true
-nom.workspace    = true
+chrono = { workspace = true }
+nom    = { workspace = true }
 # nom-tracer isn't compatible with nom 8.0.0 yet, and only works with 7.x at most.
-# nom-tracer = { version = "1.0.1", features = ["trace-color", "trace-context"] }
-remain.workspace    = true
-serde.workspace     = true
-thiserror.workspace = true
+# nom-tracer = { workspace = true }
+remain    = { workspace = true }
+serde     = { workspace = true }
+thiserror = { workspace = true }

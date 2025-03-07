@@ -60,3 +60,9 @@ impl std::default::Default for MatchOperation {
         }
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct SmCsvExportUpload {
+    pub filename: String,
+    pub content:  String,
+}

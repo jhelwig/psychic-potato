@@ -20,10 +20,8 @@ use crate::app::{
         LeaguesRoute,
         league_details_panel::fetch_league,
     },
-    matches::{
-        MatchRoute,
-        fetch_match,
-    },
+    matches::fetch_match,
+    sm_upload::SmExportUpload,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
@@ -104,7 +102,7 @@ pub fn match_details(props: &MatchDetailsProps) -> Html {
                     </BreadcrumbItem>
                     <BreadcrumbItem>
                         <Link<LeagueRoute>
-                            to={LeagueRoute::Match { match_id: props.match_object.id, page: MatchRoute::Details }}
+                            to={LeagueRoute::Matches(crate::app::matches::MatchesRoute::Index)}
                         >
                             { "Matches" }
                         </Link<LeagueRoute>>
@@ -115,6 +113,12 @@ pub fn match_details(props: &MatchDetailsProps) -> Html {
                 </Breadcrumb>
             </PageSection>
             <PageContent title={league_name.clone()} subtitle={match_name.clone()}>
+                <Content>
+                    <SmExportUpload
+                        league={props.league.clone()}
+                        match_object={props.match_object.clone()}
+                    />
+                </Content>
                 <Content>
                     { "Match Details..." }
                 </Content>
