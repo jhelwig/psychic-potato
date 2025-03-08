@@ -46,7 +46,9 @@ pub fn router(app_state: AppState) -> Router<AppState> {
 fn single_league_router(app_state: AppState) -> Router<AppState> {
     Router::new()
         .route("/", get(get_league))
-        .nest("/match", crate::app::matches::league_match_router(app_state))
+        .nest("/match", crate::app::matches::league_match_router(app_state.clone()))
+        .nest("/class", crate::app::classes::router(app_state.clone()))
+        .with_state(app_state)
 }
 
 pub async fn list_leagues(

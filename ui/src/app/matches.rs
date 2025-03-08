@@ -49,7 +49,7 @@ pub async fn fetch_match(league_id: Uuid, match_id: Uuid) -> Result<Match> {
         response.json().await?
     } else {
         return Err(anyhow!(
-            "Failed to fetch matches for league {league_id}: {}\n{}",
+            "Failed to fetch match {match_id} for league {league_id}: {}\n{}",
             response.status(),
             response.text().await?,
         ));

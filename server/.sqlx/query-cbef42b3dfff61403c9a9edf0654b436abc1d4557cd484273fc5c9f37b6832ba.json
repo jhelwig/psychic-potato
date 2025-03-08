@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO strings (\n    id,\n    string_date,\n    string_name,\n    target,\n    distance,\n    score,\n    export_id\n  )\nVALUES ($1, $2, $3, $4, $5, $6, $7);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 7
+    },
+    "nullable": []
+  },
+  "hash": "cbef42b3dfff61403c9a9edf0654b436abc1d4557cd484273fc5c9f37b6832ba"
+}

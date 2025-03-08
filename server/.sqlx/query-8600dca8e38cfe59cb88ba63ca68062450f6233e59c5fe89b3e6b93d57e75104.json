@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO shots (\n    id,\n    shot_time,\n    shot_id,\n    tags,\n    score,\n    position,\n    velocity,\n    yaw,\n    pitch,\n    quality,\n    string_id\n  )\nVALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 11
+    },
+    "nullable": []
+  },
+  "hash": "8600dca8e38cfe59cb88ba63ca68062450f6233e59c5fe89b3e6b93d57e75104"
+}

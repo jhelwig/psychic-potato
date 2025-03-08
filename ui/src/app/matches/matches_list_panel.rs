@@ -54,7 +54,7 @@ pub fn matches_list_panel(props: &MatchesListPanelProps) -> Html {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Properties)]
+#[derive(Debug, Clone, PartialEq, Eq, Properties)]
 pub struct MatchListProps {
     pub league: Rc<League>,
 }

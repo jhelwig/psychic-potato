@@ -33,6 +33,7 @@ use tower_http::{
 
 use crate::error::AppError;
 
+pub mod classes;
 pub mod export;
 pub mod leagues;
 pub mod matches;

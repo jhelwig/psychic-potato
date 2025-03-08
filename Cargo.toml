@@ -23,6 +23,7 @@ chrono               = { version = "0.4.40", features = ["serde"] }
 gloo-net             = { version = "0.6.0" }
 gloo-utils           = { version = "0.2.0" }
 log                  = { version = "0.4.26" }
+markdown             = { version = "1.0.0-alpha.23" }
 miette               = { version = "7.5.0" }
 nom                  = { version = "8.0.0" }
 patternfly-yew       = { version = "0.6.3", features = ["tree", "icons-fab"] }
@@ -31,7 +32,7 @@ serde                = { version = "1.0.218", features = ["derive"] }
 serde_json           = { version = "1.0.140" }
 sqlx                 = { version = "0.8.3", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
 thiserror            = { version = "2.0.12" }
-tokio                = { version = "1.43.0", features = ["full"] }
+tokio                = { version = "1.44.0", features = ["full"] }
 tower                = { version = "0.5.2", features = ["util"] }
 ulid                 = { version = "1.1.4" }
 uuid                 = { version = "1.15.1", features = ["serde", "v4"] }

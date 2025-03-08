@@ -16,6 +16,10 @@ use yew_nested_router::prelude::{
 use crate::app::{
     AppRoute,
     PageContent,
+    classes::{
+        ClassesRoute,
+        classes_panel::ClassesPanel,
+    },
     leagues::{
         LeagueRoute,
         fetch_league,
@@ -82,6 +86,10 @@ fn league_panel_body(props: &LeaguePanelProps) -> HtmlResult {
                         <TabsRouter<LeagueRoute> r#box=true>
                             <TabRouterItem<LeagueRoute> to={LeagueRoute::Details} title="Details" />
                             <TabRouterItem<LeagueRoute>
+                                to={LeagueRoute::Classes(ClassesRoute::Index)}
+                                title="Classes"
+                            />
+                            <TabRouterItem<LeagueRoute>
                                 to={LeagueRoute::Matches(MatchesRoute::Index)}
                                 title="Matches"
                             />
@@ -104,13 +112,28 @@ fn league_panel_body(props: &LeaguePanelProps) -> HtmlResult {
 
 pub fn switch_league_panel(league: Rc<League>, target: LeagueRoute) -> Html {
     let route = match target {
+        LeagueRoute::Class {
+            class_id,
+            ..
+        } => {
+            html!(
+                <Content>
+                    { format!("Class: {}", class_id) }
+                </Content>
+            )
+        }
+        LeagueRoute::Classes(_) => {
+            html!(
+                <Suspense fallback="Loading class list...">
+                    <ClassesPanel {league} />
+                </Suspense>
+            )
+        }
         LeagueRoute::Details => {
             html!(
-                <>
-                    <Suspense fallback="Loading league details...">
-                        <LeagueDetailsPanel {league} />
-                    </Suspense>
-                </>
+                <Suspense fallback="Loading league details...">
+                    <LeagueDetailsPanel {league} />
+                </Suspense>
             )
         }
         LeagueRoute::Matches(_) => {

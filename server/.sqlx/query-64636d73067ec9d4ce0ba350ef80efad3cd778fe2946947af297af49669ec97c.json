@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO exports (\n    id,\n    file_name,\n    generated_date,\n    string_count,\n    string_date,\n    match_id\n  )\nVALUES ($1, $2, $3, $4, $5, $6);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "64636d73067ec9d4ce0ba350ef80efad3cd778fe2946947af297af49669ec97c"
+}

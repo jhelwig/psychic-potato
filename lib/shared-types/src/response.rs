@@ -70,7 +70,7 @@ pub struct ShotMarkerShot {
     pub shot_string_id: Uuid,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Class {
     pub id:          Uuid,
     pub name:        String,
@@ -78,7 +78,7 @@ pub struct Class {
     pub league_id:   Uuid,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Shooter {
     pub id:               Uuid,
     pub name:             String,

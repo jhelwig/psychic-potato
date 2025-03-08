@@ -13,6 +13,7 @@ browser-panic-hook   = { workspace = true }
 gloo-net             = { workspace = true }
 gloo-utils           = { workspace = true }
 log                  = { workspace = true }
+markdown             = { workspace = true }
 patternfly-yew       = { workspace = true }
 remain               = { workspace = true }
 serde                = { workspace = true }

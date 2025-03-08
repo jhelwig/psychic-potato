@@ -11,6 +11,7 @@ use yew_nested_router::{
 };
 
 pub mod admin;
+pub mod classes;
 pub mod leagues;
 pub mod matches;
 pub mod shooters;

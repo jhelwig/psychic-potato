@@ -61,6 +61,26 @@ impl std::default::Default for MatchOperation {
     }
 }
 
+#[remain::sorted]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ClassOperation {
+    Create {
+        name:        String,
+        description: Option<String>,
+    },
+    Delete {
+        id: Uuid,
+    },
+    SetDescription {
+        id:          Uuid,
+        description: Option<String>,
+    },
+    SetName {
+        id:   Uuid,
+        name: String,
+    },
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct SmCsvExportUpload {
     pub filename: String,

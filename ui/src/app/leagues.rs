@@ -20,6 +20,10 @@ pub mod leagues_panel;
 
 use crate::app::{
     AppRoute,
+    classes::{
+        ClassRoute,
+        ClassesRoute,
+    },
     matches::{
         MatchRoute,
         MatchesRoute,
@@ -39,6 +43,12 @@ pub enum LeaguesRoute {
 #[remain::sorted]
 #[derive(Debug, Clone, Default, PartialEq, Eq, Target)]
 pub enum LeagueRoute {
+    Class {
+        class_id: Uuid,
+        #[target(nested, default)]
+        page:     ClassRoute,
+    },
+    Classes(ClassesRoute),
     #[default]
     #[target(index)]
     Details,
@@ -65,6 +75,26 @@ impl LeagueRoute {
         let upwards = move |page| {
             LeagueRoute::Match {
                 match_id,
+                page,
+            }
+        };
+
+        Mapper::new(downwards, upwards)
+    }
+
+    pub fn mapper_class(class_id: Uuid) -> Mapper<LeagueRoute, ClassRoute> {
+        let downwards = move |page| {
+            match page {
+                LeagueRoute::Class {
+                    page,
+                    ..
+                } => Some(page),
+                _ => None,
+            }
+        };
+        let upwards = move |page| {
+            LeagueRoute::Class {
+                class_id,
                 page,
             }
         };

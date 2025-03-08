@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO shotmarker_export_files (\n    id,\n    file_name,\n    contents,\n    uploaded_at,\n    export_id\n  )\nVALUES ($1, $2, $3, $4, $5);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "e343f99841b9b07d06cbf20ba5dbad7d5c2141ceb005ba94ff7ee699ecdb2447"
+}
