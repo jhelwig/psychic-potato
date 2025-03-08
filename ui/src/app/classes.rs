@@ -8,6 +8,7 @@ use uuid::Uuid;
 use yew_nested_router::prelude::*;
 
 pub mod class_create_panel;
+pub mod class_details_panel;
 pub mod class_list_panel;
 pub mod classes_panel;
 

@@ -190,6 +190,7 @@ pub fn class_create_panel(props: &ClassCreatePanelProps) -> HtmlResult {
                     <FormGroup label="Class Description">
                         <TextArea
                             placeholder="Enter class description"
+                            rows=20
                             value={(*class_description).clone()}
                             onchange={class_description_onchange}
                         />

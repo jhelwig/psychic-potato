@@ -18,6 +18,7 @@ use crate::app::{
     PageContent,
     classes::{
         ClassesRoute,
+        class_details_panel::ClassDetailsPanel,
         classes_panel::ClassesPanel,
     },
     leagues::{
@@ -117,9 +118,9 @@ pub fn switch_league_panel(league: Rc<League>, target: LeagueRoute) -> Html {
             ..
         } => {
             html!(
-                <Content>
-                    { format!("Class: {}", class_id) }
-                </Content>
+                <Suspense fallback="Loading class...">
+                    <ClassDetailsPanel {league} {class_id} />
+                </Suspense>
             )
         }
         LeagueRoute::Classes(_) => {
