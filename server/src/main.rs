@@ -1,6 +1,9 @@
 use anyhow::Result;
 use log::LevelFilter;
-use sqlx::sqlite::SqlitePoolOptions;
+use sqlx::{
+    Executor,
+    sqlite::SqlitePoolOptions,
+};
 use tokio::signal;
 
 pub mod app;
@@ -22,6 +25,13 @@ async fn main() -> Result<()> {
         .acquire_slow_threshold(std::time::Duration::from_millis(50))
         .acquire_timeout(std::time::Duration::from_millis(250))
         .test_before_acquire(true)
+        .after_connect(|conn, _meta| {
+            Box::pin(async move {
+                conn.execute("PRAGMA foreign_keys = on;").await?;
+
+                Ok(())
+            })
+        })
         .connect(&db_connection_str)
         .await?;
 
