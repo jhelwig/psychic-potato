@@ -16,10 +16,19 @@ use axum::{
         Response,
     },
 };
+use axum_session::{
+    SessionLayer,
+    SessionStore,
+};
+use axum_session_auth::{
+    AuthConfig,
+    AuthSessionLayer,
+};
+use axum_session_sqlx::SessionSqlitePool;
 use serde_json::json;
 use sqlx::{
-    Pool,
     Sqlite,
+    SqlitePool,
     Transaction,
 };
 use tower::ServiceBuilder;
@@ -30,9 +39,14 @@ use tower_http::{
     set_header::SetResponseHeaderLayer,
     trace::TraceLayer,
 };
+use uuid::Uuid;
 
-use crate::error::AppError;
+use crate::{
+    app::auth::User,
+    error::AppError,
+};
 
+pub mod auth;
 pub mod classes;
 pub mod export;
 pub mod leagues;
@@ -40,7 +54,7 @@ pub mod matches;
 
 #[derive(Debug, Clone)]
 pub struct AppState {
-    pub db_pool: Pool<Sqlite>,
+    pub db_pool: SqlitePool,
 }
 
 pub struct DbTransaction<'a>(Transaction<'a, Sqlite>);
@@ -63,13 +77,24 @@ where
     }
 }
 
-pub fn build(app_state: AppState) -> Router {
+pub fn build(
+    app_state: AppState,
+    session_store: SessionStore<SessionSqlitePool>,
+    auth_config: AuthConfig<Uuid>,
+) -> Router {
     let service_builder = ServiceBuilder::new()
         .layer(RequestDecompressionLayer::new())
         .layer(CompressionLayer::new())
         .layer(SetResponseHeaderLayer::overriding(CONTENT_LENGTH, content_length_from_response))
         .layer(TraceLayer::new_for_http())
-        .layer(CorsLayer::permissive());
+        .layer(CorsLayer::permissive())
+        .layer(SessionLayer::new(session_store))
+        .layer(
+            AuthSessionLayer::<User, Uuid, SessionSqlitePool, SqlitePool>::new(Some(
+                app_state.db_pool.clone(),
+            ))
+            .with_config(auth_config),
+        );
 
     Router::new()
         .nest("/league", leagues::router(app_state.clone()))

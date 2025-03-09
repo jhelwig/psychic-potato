@@ -11,6 +11,7 @@ use yew_nested_router::{
 };
 
 pub mod admin;
+pub mod auth;
 pub mod classes;
 pub mod leagues;
 pub mod matches;
@@ -21,6 +22,10 @@ use crate::app::{
     admin::{
         AdminPanel,
         AdminRoute,
+    },
+    auth::{
+        AppLogin,
+        AuthInfo,
     },
     leagues::{
         LeagueRoute,
@@ -69,16 +74,20 @@ impl AppRoute {
 
 #[function_component(App)]
 pub fn app() -> Html {
+    let auth_info = use_state(AuthInfo::default);
+
     html! {
-        <BackdropViewer>
-            <ToastViewer>
-                <Router<AppRoute> default={AppRoute::Index}>
-                    <AppPage>
-                        <RouterSwitch<AppRoute> render={switch_app_route} />
-                    </AppPage>
-                </Router<AppRoute>>
-            </ToastViewer>
-        </BackdropViewer>
+        <ContextProvider<AuthInfo> context={(*auth_info).clone()}>
+            <BackdropViewer>
+                <ToastViewer>
+                    <Router<AppRoute> default={AppRoute::Index}>
+                        <AppPage>
+                            <RouterSwitch<AppRoute> render={switch_app_route} />
+                        </AppPage>
+                    </Router<AppRoute>>
+                </ToastViewer>
+            </BackdropViewer>
+        </ContextProvider<AuthInfo>>
     }
 }
 
@@ -188,6 +197,10 @@ pub fn app_page(props: &PageProps) -> Html {
                             onchange={onthemeswitch}
                             label="Dark Theme"
                         />
+                    </ToolbarItem>
+                    // <ToolbarDivider />
+                    <ToolbarItem>
+                        <AppLogin />
                     </ToolbarItem>
                 </ToolbarGroup>
             </ToolbarContent>

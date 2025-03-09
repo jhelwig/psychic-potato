@@ -7,11 +7,16 @@ publish.workspace = true
 
 [dependencies]
 anyhow            = { workspace = true }
+argon2            = { workspace = true }
+async-trait       = { workspace = true }
 axum              = { workspace = true }
+axum_session      = { workspace = true }
 axum_session_auth = { workspace = true }
 axum_session_sqlx = { workspace = true }
 chrono            = { workspace = true }
 log               = { workspace = true }
+password-hash     = { workspace = true }
+serde             = { workspace = true }
 serde_json        = { workspace = true }
 sqlx              = { workspace = true }
 thiserror         = { workspace = true }

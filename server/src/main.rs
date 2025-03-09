@@ -1,10 +1,17 @@
 use anyhow::Result;
+use axum_session::{
+    SessionConfig,
+    SessionStore,
+};
+use axum_session_auth::AuthConfig;
+use axum_session_sqlx::SessionSqlitePool;
 use log::LevelFilter;
 use sqlx::{
     Executor,
     sqlite::SqlitePoolOptions,
 };
 use tokio::signal;
+use uuid::Uuid;
 
 pub mod app;
 pub mod error;
@@ -35,12 +42,21 @@ async fn main() -> Result<()> {
         .connect(&db_connection_str)
         .await?;
 
+    let session_config = SessionConfig::default().with_table_name("sessions");
+    let session_store = SessionStore::<SessionSqlitePool>::new(
+        Some(SessionSqlitePool::from(db_pool.clone())),
+        session_config,
+    )
+    .await?;
+
+    let auth_config = AuthConfig::<Uuid>::default().with_anonymous_user_id(None);
+
     sqlx::migrate!().run(&db_pool).await?;
 
     let app_state = app::AppState {
         db_pool,
     };
-    let app = app::build(app_state);
+    let app = app::build(app_state, session_store, auth_config);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:9000").await?;
     println!("Server running on http://127.0.0.1:9000/");

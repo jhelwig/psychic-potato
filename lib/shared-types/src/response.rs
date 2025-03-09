@@ -84,3 +84,9 @@ pub struct Shooter {
     pub name:             String,
     pub default_class_id: Option<Uuid>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct User {
+    pub id:       Uuid,
+    pub username: String,
+}
