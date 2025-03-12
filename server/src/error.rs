@@ -17,11 +17,17 @@ pub enum HttpResponse {
     NotFound {
         message: String,
     },
+    #[error("Not Authorized")]
+    Unauthorized,
 }
 
 impl IntoResponse for HttpResponse {
     fn into_response(self) -> Response {
         match self {
+            HttpResponse::Unauthorized => {
+                (StatusCode::UNAUTHORIZED, Json(json!({"message": "Not Authorized"})))
+                    .into_response()
+            }
             HttpResponse::NotFound {
                 message,
             } => (StatusCode::NOT_FOUND, Json(json!({"message": message}))).into_response(),

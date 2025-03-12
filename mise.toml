@@ -45,3 +45,8 @@ dir         = "server"
 description = "Serve API"
 run         = "cargo run"
 dir         = "server"
+
+[tasks.server-sqlx-prepare]
+description = "Prepare offline sqlx files"
+run         = "cargo sqlx prepare"
+dir         = "server"

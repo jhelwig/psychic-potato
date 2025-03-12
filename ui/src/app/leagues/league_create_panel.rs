@@ -1,4 +1,7 @@
-use std::borrow::Borrow;
+use std::{
+    borrow::Borrow,
+    time::Duration,
+};
 
 use anyhow::Result;
 use gloo_net::http::Request;
@@ -141,7 +144,7 @@ pub fn create_league_panel() -> HtmlResult {
                 toaster.toast(Toast {
                     title: title.to_string(),
                     r#type: alert_type,
-                    timeout: None,
+                    timeout: Some(Duration::from_secs(5)),
                     body,
                     actions: Vec::new(),
                 });

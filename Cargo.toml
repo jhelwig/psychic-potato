@@ -12,13 +12,14 @@ publish = false
 [workspace.dependencies]
 # nom-tracer isn't compatible with nom 8.0.0 yet, and only works with 7.x at most.
 # nom-tracer = { version = "1.0.1", features = ["trace-color", "trace-context"] }
-anyhow               = { version = "1.0.97" }
-argon2               = { version = "0.5.3" }
-async-trait          = { version = "0.1.87" }
-axum                 = { version = "0.8.1", features = ["multipart", "tracing"] }
-axum_session         = { version = "0.16.0" }
-axum_session_auth    = { version = "0.16.0", features = ["rest_mode"] }
-axum_session_sqlx    = { version = "0.5.0", default_featues = false, features = ["sqlite", "tls-rustls"] }
+anyhow       = { version = "1.0.97" }
+argon2       = { version = "0.5.3" }
+async-trait  = { version = "0.1.87" }
+axum         = { version = "0.8.1", features = ["tower-log", "tracing"] }
+axum_session = { version = "0.16.0" }
+# axum_session_auth    = { version = "0.16.0", features = ["rest_mode"] }
+axum_session_auth    = { version = "0.16.0" }
+axum_session_sqlx    = { version = "0.5.0", features = ["sqlite", "tls-rustls"] }
 browser-panic-hook   = { version = "0.2.0" }
 cfg-if               = { version = "1.0.0" }
 chrono               = { version = "0.4.40", features = ["serde"] }
@@ -37,6 +38,8 @@ sqlx                 = { version = "0.8.3", features = ["runtime-tokio-rustls", 
 thiserror            = { version = "2.0.12" }
 tokio                = { version = "1.44.0", features = ["full"] }
 tower                = { version = "0.5.2", features = ["util"] }
+tracing              = { version = "0.1.41" }
+tracing-subscriber   = { version = "0.3.19", features = ["env-filter", "registry"] }
 ulid                 = { version = "1.1.4" }
 uuid                 = { version = "1.15.1", features = ["serde", "v4"] }
 wasm-bindgen         = { version = "0.2.100" }

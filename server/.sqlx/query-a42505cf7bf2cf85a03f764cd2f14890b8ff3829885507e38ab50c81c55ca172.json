@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id AS 'id!: Uuid',\n  username AS 'username!: String',\n  password_hash AS 'password_hash!: String'\nFROM users\nWHERE id = $1;\n",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!: Uuid",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "username!: String",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "password_hash!: String",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "a42505cf7bf2cf85a03f764cd2f14890b8ff3829885507e38ab50c81c55ca172"
+}

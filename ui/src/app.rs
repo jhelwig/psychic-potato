@@ -26,6 +26,7 @@ use crate::app::{
     auth::{
         AppLogin,
         AuthInfo,
+        AuthInfoProvider,
     },
     leagues::{
         LeagueRoute,
@@ -74,10 +75,8 @@ impl AppRoute {
 
 #[function_component(App)]
 pub fn app() -> Html {
-    let auth_info = use_state(AuthInfo::default);
-
     html! {
-        <ContextProvider<AuthInfo> context={(*auth_info).clone()}>
+        <AuthInfoProvider>
             <BackdropViewer>
                 <ToastViewer>
                     <Router<AppRoute> default={AppRoute::Index}>
@@ -87,7 +86,7 @@ pub fn app() -> Html {
                     </Router<AppRoute>>
                 </ToastViewer>
             </BackdropViewer>
-        </ContextProvider<AuthInfo>>
+        </AuthInfoProvider>
     }
 }
 
@@ -200,7 +199,9 @@ pub fn app_page(props: &PageProps) -> Html {
                     </ToolbarItem>
                     // <ToolbarDivider />
                     <ToolbarItem>
-                        <AppLogin />
+                        <Suspense fallback={html!(<Spinner size={SpinnerSize::Md} />)}>
+                            <AppLogin />
+                        </Suspense>
                     </ToolbarItem>
                 </ToolbarGroup>
             </ToolbarContent>

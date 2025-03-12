@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO classes (id, class_name, description, league_id)\nVALUES ($1, $2, $3, $4);\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "a85d08f1d66fc48a6da528b5133cdc9c698aec0e96d41fe6e65ccc57a7b0ca89"
+}

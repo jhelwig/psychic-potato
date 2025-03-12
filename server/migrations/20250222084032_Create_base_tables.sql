@@ -81,3 +81,9 @@ CREATE TABLE shooters (
   DELETE
   SET NULL
 );
+
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL
+);

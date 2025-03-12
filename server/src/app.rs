@@ -20,10 +20,7 @@ use axum_session::{
     SessionLayer,
     SessionStore,
 };
-use axum_session_auth::{
-    AuthConfig,
-    AuthSessionLayer,
-};
+use axum_session_auth::AuthConfig;
 use axum_session_sqlx::SessionSqlitePool;
 use serde_json::json;
 use sqlx::{
@@ -42,7 +39,7 @@ use tower_http::{
 use uuid::Uuid;
 
 use crate::{
-    app::auth::User,
+    app::auth::AppAuthSessionLayer,
     error::AppError,
 };
 
@@ -83,21 +80,18 @@ pub fn build(
     auth_config: AuthConfig<Uuid>,
 ) -> Router {
     let service_builder = ServiceBuilder::new()
+        .layer(TraceLayer::new_for_http())
         .layer(RequestDecompressionLayer::new())
         .layer(CompressionLayer::new())
         .layer(SetResponseHeaderLayer::overriding(CONTENT_LENGTH, content_length_from_response))
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::permissive())
         .layer(SessionLayer::new(session_store))
-        .layer(
-            AuthSessionLayer::<User, Uuid, SessionSqlitePool, SqlitePool>::new(Some(
-                app_state.db_pool.clone(),
-            ))
-            .with_config(auth_config),
-        );
+        .layer(AppAuthSessionLayer::new(Some(app_state.db_pool.clone())).with_config(auth_config));
 
     Router::new()
         .nest("/league", leagues::router(app_state.clone()))
+        .nest("/user", auth::routes::router(app_state.clone()))
         .layer(service_builder)
         .with_state(app_state)
         .fallback(handler_404)

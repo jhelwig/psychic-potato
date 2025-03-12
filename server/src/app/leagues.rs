@@ -12,6 +12,7 @@ use chrono::{
     NaiveDate,
     Utc,
 };
+use log::info;
 use shared_types::{
     request::LeagueOperation,
     response::League,
@@ -23,6 +24,10 @@ use crate::{
     app::{
         AppState,
         DbTransaction,
+        auth::{
+            AppAuthSession,
+            AuthenticatedUser,
+        },
     },
     error::AppError,
 };
@@ -81,8 +86,13 @@ pub async fn get_league(
 
 pub async fn handle_league_operation(
     DbTransaction(mut txn): DbTransaction<'_>,
+    AuthenticatedUser(auth_session): AuthenticatedUser,
     Json(operation): Json<LeagueOperation>,
 ) -> Result<Json<League>, AppError> {
+    let user = &auth_session.current_user;
+    let session_id = auth_session.session.get_session_id();
+    info!("Handling league operation for {user:?} (Session: {session_id:?}): {operation:?}");
+
     let result = match operation {
         LeagueOperation::Create {
             league_name,

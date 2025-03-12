@@ -1,32 +1,85 @@
-use log::debug;
+use std::{
+    borrow::Borrow,
+    rc::Rc,
+    time::Duration,
+};
+
+use gloo_net::http::Request;
+use log::{
+    debug,
+    error,
+    info,
+};
 use patternfly_yew::prelude::*;
-use shared_types::response::User;
-use yew::prelude::*;
+use shared_types::{
+    request::RegisterUser,
+    response::User,
+};
+use yew::{
+    prelude::*,
+    suspense::use_future,
+};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct AuthInfo {
-    pub user:       Option<User>,
-    pub auth_token: Option<String>,
+    pub user: Option<User>,
+}
+
+impl Reducible for AuthInfo {
+    type Action = Option<User>;
+
+    fn reduce(self: Rc<Self>, action: Self::Action) -> Rc<Self> {
+        AuthInfo {
+            user: action,
+        }
+        .into()
+    }
+}
+
+pub type AuthInfoContext = UseReducerHandle<AuthInfo>;
+
+#[derive(Debug, Clone, PartialEq, Properties)]
+pub struct AuthInfoProviderProps {
+    #[prop_or_default]
+    pub children: Children,
+}
+
+#[function_component(AuthInfoProvider)]
+pub fn auth_info_provider(props: &AuthInfoProviderProps) -> Html {
+    let auth_info = use_reducer(AuthInfo::default);
+
+    html!(
+        <ContextProvider<AuthInfoContext> context={auth_info}>
+            { props.children.clone() }
+        </ContextProvider<AuthInfoContext>>
+    )
 }
 
 #[function_component(AppLogin)]
-pub fn app_login() -> Html {
-    let Some(auth_info) = use_context::<AuthInfo>() else {
-        return html!();
+pub fn app_login() -> HtmlResult {
+    let Some(auth_info) = use_context::<AuthInfoContext>() else {
+        return Ok(html!({ "No AuthInfoContext" }));
     };
 
-    html!(
+    let response = use_future(|| async move { fetch_current_user().await })?;
+
+    if let Some(user) = &*response {
+        info!("Logged in as {}", &user.username);
+        auth_info.dispatch(Some(user.clone()));
+    }
+
+    Ok(html!(
         if auth_info.user.is_some() {
             <UserInfo />
         } else {
             <LoginModalButton />
         }
-    )
+    ))
 }
 
 #[function_component(UserInfo)]
 fn user_info() -> Html {
-    let Some(auth_info) = use_context::<AuthInfo>() else {
+    let Some(auth_info) = use_context::<AuthInfoContext>() else {
         return html!();
     };
     let Some(user) = auth_info.user.as_ref() else {
@@ -79,6 +132,11 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
     let username = use_state_eq(String::new);
     let password = use_state_eq(String::new);
     let confirm_password = use_state_eq(String::new);
+    let is_password_confirmation_match = use_state(|| true);
+    let is_submitting = use_state_eq(|| false);
+    let maybe_user: UseStateHandle<Option<Result<User, Html>>> = use_state_eq(|| None);
+    let toaster = use_toaster();
+    let auth_info = use_context::<AuthInfoContext>();
 
     let cancel_onclick = {
         let backdropper = backdropper.clone();
@@ -115,48 +173,194 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
             confirm_password.set(new_confirm_password);
         });
 
+    let effect_is_password_confirmation_match = is_password_confirmation_match.clone();
+    use_effect_with(
+        (confirm_password.clone(), password.clone()),
+        move |(confirm_password, password)| {
+            effect_is_password_confirmation_match.set(*password == *confirm_password);
+        },
+    );
+
     let onsubmit = {
         let form_state = form_state.clone();
         let username = username.clone();
         let password = password.clone();
         let confirm_password = confirm_password.clone();
+        let is_submitting = is_submitting.clone();
+        let maybe_user_setter = maybe_user.setter();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
+            is_submitting.set(true);
 
             match *form_state {
                 ModalState::Login => {
                     // Login logic goes here
                     debug!("Logging in user with username: {}", &*username);
+                    let login_payload = shared_types::request::Login {
+                        username: (*username).clone(),
+                        password: (*password).clone(),
+                    };
+                    let spawned_maybe_user_setter = maybe_user_setter.clone();
+                    wasm_bindgen_futures::spawn_local(async move {
+                        let response = match Request::post("/api/user/login").json(&login_payload) {
+                            Ok(req) => req.send().await,
+                            Err(error) => {
+                                error!("Unable to set request body: {}", error);
+                                spawned_maybe_user_setter.set(Some(Err(html!(
+                                    { format!("Unable to set user login request body: {error}") }
+                                ))));
+                                return;
+                            }
+                        };
+                        match response {
+                            Ok(response) => {
+                                if response.ok() {
+                                    match response.json().await {
+                                        Ok(user) => {
+                                            spawned_maybe_user_setter.set(Some(Ok(user)));
+                                        }
+                                        Err(error) => {
+                                            error!("Unable to parse response: {error}");
+                                            spawned_maybe_user_setter.set(Some(Err(html!(
+                                                { format!(
+                                                    "Unable to parse user login response: {error}"
+                                                ) }
+                                            ))));
+                                        }
+                                    }
+                                } else {
+                                    error!("Request failed: {}", response.status());
+                                    spawned_maybe_user_setter.set(Some(Err(html!(
+                                        { format!("Request failed: {}", response.status()) }
+                                    ))));
+                                }
+                            }
+                            Err(error) => {
+                                error!("Unable to send request: {}", error);
+                                spawned_maybe_user_setter.set(Some(Err(html!(
+                                    { format!("Unable to send user login request: {error}") }
+                                ))));
+                            }
+                        }
+                    })
                 }
                 ModalState::Register => {
                     if *password == *confirm_password {
                         // Register logic goes here
                         debug!("Registering user with username: {}", &*username);
+                        let register_payload = RegisterUser {
+                            username: (*username).clone(),
+                            password: (*password).clone(),
+                        };
+                        let spawned_maybe_user_setter = maybe_user_setter.clone();
+                        wasm_bindgen_futures::spawn_local(async move {
+                            let response =
+                                match Request::post("/api/user/register").json(&register_payload) {
+                                    Ok(req) => req.send().await,
+                                    Err(error) => {
+                                        error!("Unable to set request body: {}", error);
+                                        spawned_maybe_user_setter.set(Some(Err(html!(
+                                            { format!(
+                                            "Unable to set user registration request body: {error}"
+                                        ) }
+                                        ))));
+                                        return;
+                                    }
+                                };
+                            match response {
+                                Ok(response) => {
+                                    if response.ok() {
+                                        match response.json().await {
+                                            Ok(user) => {
+                                                spawned_maybe_user_setter.set(Some(Ok(user)));
+                                            }
+                                            Err(error) => {
+                                                error!("Unable to parse response: {error}");
+                                                spawned_maybe_user_setter.set(Some(Err(html!(
+                                                    { format!(
+                                                    "Unable to parse registration response: {error}"
+                                                ) }
+                                                ))));
+                                            }
+                                        };
+                                    } else {
+                                        error!("Request failed: {}", response.status());
+                                        let error_text = match response.text().await {
+                                            Ok(text) => text,
+                                            Err(error) => error.to_string(),
+                                        };
+                                        spawned_maybe_user_setter.set(Some(Err(html!(
+                                            format!(
+                                            "{} {}: {error_text}",
+                                            response.status(),
+                                            response.status_text(),
+                                        )
+                                        ))));
+                                    }
+                                }
+                                Err(error) => {
+                                    error!("Error registering user: {error}");
+                                    spawned_maybe_user_setter.set(Some(Err(html!(
+                                        { format!("Error registering user: {error}") }
+                                    ))));
+                                }
+                            }
+                        });
                     } else {
                         debug!("Passwords do not match");
                     }
                 }
             }
+
+            is_submitting.set(false);
         })
     };
 
-    let footer = html! {
-        <>
-            <Button
-                variant={ButtonVariant::Primary}
-                label={match *form_state { ModalState::Login => "Log In", ModalState::Register => "Register" }}
-                r#type={ButtonType::Submit}
-                form="login-register-form"
-            />
-            <Button
-                variant={ButtonVariant::Secondary}
-                label="Cancel"
-                r#type={ButtonType::Reset}
-                onclick={cancel_onclick.clone()}
-            />
-        </>
-    };
+    use_effect_with(maybe_user.clone(), move |_| {
+        let (alert_type, title, body) = if let Some(user_result) = (*maybe_user).borrow() {
+            match user_result {
+                Ok(user) => {
+                    if let Some(auth_info) = auth_info.borrow() {
+                        auth_info.dispatch(Some(user.clone()));
+                    }
+                    (
+                        AlertType::Success,
+                        "Registration Successful",
+                        html!({ format!("Welcome, {}", user.username) }),
+                    )
+                }
+                Err(error) => {
+                    (
+                        AlertType::Danger,
+                        "Registration Failed",
+                        html!(
+                            <>
+                                <p>
+                                    { "An error occurred while registering." }
+                                </p>
+                                <p>
+                                    { error.clone() }
+                                </p>
+                            </>
+                        ),
+                    )
+                }
+            }
+        } else {
+            return;
+        };
+        if let Some(toaster) = toaster.borrow() {
+            toaster.toast(Toast {
+                title: title.to_string(),
+                r#type: alert_type,
+                timeout: Some(Duration::from_secs(5)),
+                body,
+                actions: Vec::new(),
+            })
+        }
+    });
+
     let log_in_form = html_nested!(
         <>
             <FormGroup label="Username">
@@ -206,10 +410,28 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                     value={(*confirm_password).clone()}
                     r#type={TextInputType::Password}
                     onchange={confirm_password_onchange.clone()}
+                    state={if *is_password_confirmation_match.clone() {InputState::Success} else {InputState::Error}}
                 />
             </FormGroup>
         </>
     );
+    let footer = html! {
+        <>
+            <Button
+                variant={ButtonVariant::Primary}
+                label={match *form_state { ModalState::Login => "Log In", ModalState::Register => "Register" }}
+                r#type={ButtonType::Submit}
+                form="login-register-form"
+                loading={*(is_submitting.clone())}
+            />
+            <Button
+                variant={ButtonVariant::Secondary}
+                label="Cancel"
+                r#type={ButtonType::Reset}
+                onclick={cancel_onclick.clone()}
+            />
+        </>
+    };
 
     html!(
         <Bullseye>
@@ -233,4 +455,35 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
             </Modal>
         </Bullseye>
     )
+}
+
+async fn fetch_current_user() -> Option<User> {
+    let response = match Request::get("/api/user").send().await {
+        Ok(resp) => resp,
+        Err(error) => {
+            error!("Error fetching current user: {error}");
+            return None;
+        }
+    };
+    let user: User = if response.ok() {
+        match response.json().await {
+            Ok(user) => user,
+            Err(error) => {
+                error!("Unable to parse response: {error}");
+                return None;
+            }
+        }
+    } else {
+        let response_text = match response.text().await {
+            Ok(t) => t,
+            Err(error) => {
+                error!("Error fetching current user: {error}");
+                return None;
+            }
+        };
+        error!("Failed to fetch current user ({}): {response_text}", response.status());
+        return None;
+    };
+
+    Some(user)
 }

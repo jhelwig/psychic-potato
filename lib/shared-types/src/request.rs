@@ -86,3 +86,15 @@ pub struct SmCsvExportUpload {
     pub filename: String,
     pub content:  String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Login {
+    pub username: String,
+    pub password: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct RegisterUser {
+    pub username: String,
+    pub password: String,
+}

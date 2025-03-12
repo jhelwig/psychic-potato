@@ -11,6 +11,7 @@ use sqlx::{
     sqlite::SqlitePoolOptions,
 };
 use tokio::signal;
+use tracing_subscriber::prelude::*;
 use uuid::Uuid;
 
 pub mod app;
@@ -18,13 +19,22 @@ pub mod error;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let db_connection_str =
-        std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite:league.db?mode=rwc".to_string());
     if std::env::var("RUST_LIB_BACKTRACE").is_err() {
         unsafe {
             std::env::set_var("RUST_LIB_BACKTRACE", "1");
         }
     }
+
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+            format!("{}=debug,tower_http=debug,acum::rejection=trace", env!("CARGO_CRATE_NAME"))
+                .into()
+        }))
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    let db_connection_str =
+        std::env::var("DATABASE_URL").unwrap_or_else(|_| "sqlite:league.db?mode=rwc".to_string());
 
     let db_pool = SqlitePoolOptions::new()
         .max_connections(10)
