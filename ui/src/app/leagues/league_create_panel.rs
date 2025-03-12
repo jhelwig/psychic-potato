@@ -4,11 +4,7 @@ use std::{
 };
 
 use anyhow::Result;
-use gloo_net::http::Request;
-use log::{
-    debug,
-    error,
-};
+use log::debug;
 use patternfly_yew::prelude::*;
 use shared_types::{
     request::LeagueOperation,
@@ -17,10 +13,13 @@ use shared_types::{
 use yew::prelude::*;
 use yew_nested_router::prelude::*;
 
-use crate::app::{
-    AppRoute,
-    PageContent,
-    leagues::LeagueRoute,
+use crate::{
+    api::perform_api_operation,
+    app::{
+        AppRoute,
+        PageContent,
+        leagues::LeagueRoute,
+    },
 };
 
 #[function_component(CreateLeaguePanel)]
@@ -38,7 +37,7 @@ pub fn create_league_panel() -> HtmlResult {
     let onsubmit = {
         let league_name = league_name.clone();
         let is_creating = is_creating.setter();
-        let maybe_league_setter = maybe_league.setter();
+        let maybe_league = maybe_league.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
@@ -50,54 +49,16 @@ pub fn create_league_panel() -> HtmlResult {
             };
 
             let spawned_league_name = league_name.clone();
-            let spawned_maybe_league_setter = maybe_league_setter.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let response = match Request::post("/api/league/operation").json(&league_operation)
-                {
-                    Ok(req) => req.send().await,
-                    Err(error) => {
-                        error!("Unable to set request body: {}", error);
-                        spawned_maybe_league_setter.set(Some(Err(error.to_string())));
-                        return;
-                    }
-                };
-                match response {
-                    Ok(response) => {
-                        if response.ok() {
-                            let league: League = match response.json().await {
-                                Ok(league) => {
-                                    spawned_league_name.set(String::new());
-                                    league
-                                }
-                                Err(error) => {
-                                    error!("Unable to parse response: {}", error);
-                                    spawned_maybe_league_setter.set(Some(Err(error.to_string())));
-                                    return;
-                                }
-                            };
-                            debug!("Created league: {league:?}");
-                            spawned_maybe_league_setter.set(Some(Ok(league)));
-                        } else {
-                            error!("Failed to create league: {}", response.status());
-                            let error_text = match response.text().await {
-                                Ok(text) => text,
-                                Err(error) => error.to_string(),
-                            };
-                            spawned_maybe_league_setter.set(Some(Err(format!(
-                                "{} {}: {error_text}",
-                                response.status(),
-                                response.status_text()
-                            ))));
-                        }
-                    }
-                    Err(error) => {
-                        error!("Error creating league: {}", error);
-                        spawned_maybe_league_setter.set(Some(Err(error.to_string())));
-                    }
-                }
-            });
-
+            let spawned_maybe_league_setter = maybe_league.setter();
+            wasm_bindgen_futures::spawn_local(perform_api_operation(
+                "/api/league/operation".to_string(),
+                league_operation,
+                spawned_maybe_league_setter.clone(),
+            ));
             is_creating.set(false);
+            if matches!(&*maybe_league, Some(Ok(_))) {
+                spawned_league_name.set(String::new());
+            }
         })
     };
 

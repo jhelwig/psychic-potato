@@ -6,11 +6,7 @@ use std::{
 
 use anyhow::Result;
 use chrono::Utc;
-use gloo_net::http::Request;
-use log::{
-    debug,
-    error,
-};
+use log::debug;
 use patternfly_yew::prelude::*;
 use shared_types::{
     request::MatchOperation,
@@ -22,10 +18,13 @@ use shared_types::{
 use yew::prelude::*;
 use yew_nested_router::prelude::*;
 
-use crate::app::{
-    PageContent,
-    leagues::LeagueRoute,
-    matches::MatchRoute,
+use crate::{
+    api::perform_api_operation,
+    app::{
+        PageContent,
+        leagues::LeagueRoute,
+        matches::MatchRoute,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
@@ -56,7 +55,7 @@ pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
     let onsubmit = {
         let match_name = match_name.clone();
         let is_creating = is_creating.setter();
-        let maybe_match_setter = maybe_match.setter();
+        let maybe_match = maybe_match.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
@@ -68,56 +67,17 @@ pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
                 event_date: (*match_date).unwrap_or_else(|| Utc::now().naive_local().date()),
             };
             let spawned_match_name = match_name.clone();
-            let spawned_maybe_match_setter = maybe_match_setter.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let response =
-                    match Request::post(&format!("/api/league/{league_id}/match/operation"))
-                        .json(&match_operation)
-                    {
-                        Ok(req) => req.send().await,
-                        Err(error) => {
-                            error!("Unable to set request body: {}", error);
-                            spawned_maybe_match_setter.set(Some(Err(error.to_string())));
-                            return;
-                        }
-                    };
-                match response {
-                    Ok(response) => {
-                        if response.ok() {
-                            let match_object: Match = match response.json().await {
-                                Ok(match_object) => {
-                                    spawned_match_name.set(String::new());
-                                    match_object
-                                }
-                                Err(error) => {
-                                    error!("Unable to parse response: {}", error);
-                                    spawned_maybe_match_setter.set(Some(Err(error.to_string())));
-                                    return;
-                                }
-                            };
-                            debug!("Created match: {match_object:?}");
-                            spawned_maybe_match_setter.set(Some(Ok(match_object)));
-                        } else {
-                            error!("Failed to create match: {}", response.status());
-                            let error_text = match response.text().await {
-                                Ok(text) => text,
-                                Err(error) => error.to_string(),
-                            };
-                            spawned_maybe_match_setter.set(Some(Err(format!(
-                                "{} {}: {error_text}",
-                                response.status(),
-                                response.status_text(),
-                            ))));
-                        }
-                    }
-                    Err(error) => {
-                        error!("Error creating match: {}", error);
-                        spawned_maybe_match_setter.set(Some(Err(error.to_string())));
-                    }
-                }
-            });
+            let spawned_maybe_match_setter = maybe_match.setter();
+            wasm_bindgen_futures::spawn_local(perform_api_operation(
+                format!("/api/league/{league_id}/match/operation"),
+                match_operation,
+                spawned_maybe_match_setter,
+            ));
 
             is_creating.set(false);
+            if matches!(&*maybe_match, Some(Ok(_))) {
+                spawned_match_name.set(String::new());
+            }
         })
     };
 

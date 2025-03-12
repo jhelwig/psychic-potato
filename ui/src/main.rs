@@ -6,6 +6,7 @@ use browser_panic_hook::{
     IntoPanicHook,
 };
 
+pub mod api;
 mod app;
 
 use app::App;

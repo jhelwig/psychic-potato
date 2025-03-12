@@ -20,6 +20,8 @@ use yew::{
     suspense::use_future,
 };
 
+use crate::api::perform_api_operation;
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct AuthInfo {
     pub user: Option<User>,
@@ -134,7 +136,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
     let confirm_password = use_state_eq(String::new);
     let is_password_confirmation_match = use_state(|| true);
     let is_submitting = use_state_eq(|| false);
-    let maybe_user: UseStateHandle<Option<Result<User, Html>>> = use_state_eq(|| None);
+    let maybe_user: UseStateHandle<Option<Result<User, String>>> = use_state_eq(|| None);
     let toaster = use_toaster();
     let auth_info = use_context::<AuthInfoContext>();
 
@@ -187,7 +189,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
         let password = password.clone();
         let confirm_password = confirm_password.clone();
         let is_submitting = is_submitting.clone();
-        let maybe_user_setter = maybe_user.setter();
+        let maybe_user = maybe_user.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
@@ -201,49 +203,12 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                         username: (*username).clone(),
                         password: (*password).clone(),
                     };
-                    let spawned_maybe_user_setter = maybe_user_setter.clone();
-                    wasm_bindgen_futures::spawn_local(async move {
-                        let response = match Request::post("/api/user/login").json(&login_payload) {
-                            Ok(req) => req.send().await,
-                            Err(error) => {
-                                error!("Unable to set request body: {}", error);
-                                spawned_maybe_user_setter.set(Some(Err(html!(
-                                    { format!("Unable to set user login request body: {error}") }
-                                ))));
-                                return;
-                            }
-                        };
-                        match response {
-                            Ok(response) => {
-                                if response.ok() {
-                                    match response.json().await {
-                                        Ok(user) => {
-                                            spawned_maybe_user_setter.set(Some(Ok(user)));
-                                        }
-                                        Err(error) => {
-                                            error!("Unable to parse response: {error}");
-                                            spawned_maybe_user_setter.set(Some(Err(html!(
-                                                { format!(
-                                                    "Unable to parse user login response: {error}"
-                                                ) }
-                                            ))));
-                                        }
-                                    }
-                                } else {
-                                    error!("Request failed: {}", response.status());
-                                    spawned_maybe_user_setter.set(Some(Err(html!(
-                                        { format!("Request failed: {}", response.status()) }
-                                    ))));
-                                }
-                            }
-                            Err(error) => {
-                                error!("Unable to send request: {}", error);
-                                spawned_maybe_user_setter.set(Some(Err(html!(
-                                    { format!("Unable to send user login request: {error}") }
-                                ))));
-                            }
-                        }
-                    })
+                    let spawned_maybe_user_setter = maybe_user.setter();
+                    wasm_bindgen_futures::spawn_local(perform_api_operation(
+                        "/api/user/login".to_string(),
+                        login_payload,
+                        spawned_maybe_user_setter,
+                    ));
                 }
                 ModalState::Register => {
                     if *password == *confirm_password {
@@ -253,60 +218,12 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                             username: (*username).clone(),
                             password: (*password).clone(),
                         };
-                        let spawned_maybe_user_setter = maybe_user_setter.clone();
-                        wasm_bindgen_futures::spawn_local(async move {
-                            let response =
-                                match Request::post("/api/user/register").json(&register_payload) {
-                                    Ok(req) => req.send().await,
-                                    Err(error) => {
-                                        error!("Unable to set request body: {}", error);
-                                        spawned_maybe_user_setter.set(Some(Err(html!(
-                                            { format!(
-                                            "Unable to set user registration request body: {error}"
-                                        ) }
-                                        ))));
-                                        return;
-                                    }
-                                };
-                            match response {
-                                Ok(response) => {
-                                    if response.ok() {
-                                        match response.json().await {
-                                            Ok(user) => {
-                                                spawned_maybe_user_setter.set(Some(Ok(user)));
-                                            }
-                                            Err(error) => {
-                                                error!("Unable to parse response: {error}");
-                                                spawned_maybe_user_setter.set(Some(Err(html!(
-                                                    { format!(
-                                                    "Unable to parse registration response: {error}"
-                                                ) }
-                                                ))));
-                                            }
-                                        };
-                                    } else {
-                                        error!("Request failed: {}", response.status());
-                                        let error_text = match response.text().await {
-                                            Ok(text) => text,
-                                            Err(error) => error.to_string(),
-                                        };
-                                        spawned_maybe_user_setter.set(Some(Err(html!(
-                                            format!(
-                                            "{} {}: {error_text}",
-                                            response.status(),
-                                            response.status_text(),
-                                        )
-                                        ))));
-                                    }
-                                }
-                                Err(error) => {
-                                    error!("Error registering user: {error}");
-                                    spawned_maybe_user_setter.set(Some(Err(html!(
-                                        { format!("Error registering user: {error}") }
-                                    ))));
-                                }
-                            }
-                        });
+                        let spawned_maybe_user_setter = maybe_user.setter();
+                        wasm_bindgen_futures::spawn_local(perform_api_operation(
+                            "/api/user/register".to_string(),
+                            register_payload,
+                            spawned_maybe_user_setter,
+                        ));
                     } else {
                         debug!("Passwords do not match");
                     }
@@ -340,7 +257,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                                     { "An error occurred while registering." }
                                 </p>
                                 <p>
-                                    { error.clone() }
+                                    { error }
                                 </p>
                             </>
                         ),

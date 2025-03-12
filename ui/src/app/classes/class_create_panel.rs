@@ -4,11 +4,7 @@ use std::{
     time::Duration,
 };
 
-use gloo_net::http::Request;
-use log::{
-    debug,
-    error,
-};
+use log::debug;
 use patternfly_yew::prelude::*;
 use shared_types::{
     request::ClassOperation,
@@ -20,9 +16,12 @@ use shared_types::{
 use yew::prelude::*;
 use yew_nested_router::prelude::*;
 
-use crate::app::{
-    PageContent,
-    leagues::LeagueRoute,
+use crate::{
+    api::perform_api_operation,
+    app::{
+        PageContent,
+        leagues::LeagueRoute,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Properties)]
@@ -53,7 +52,7 @@ pub fn class_create_panel(props: &ClassCreatePanelProps) -> HtmlResult {
         let class_name = class_name.clone();
         let class_description = class_description.clone();
         let is_creating = is_creating.setter();
-        let maybe_class_setter = maybe_class.setter();
+        let maybe_class = maybe_class.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
@@ -70,59 +69,19 @@ pub fn class_create_panel(props: &ClassCreatePanelProps) -> HtmlResult {
                 name:        (*class_name).clone(),
                 description: operation_description,
             };
-            let spawned_class_name = class_name.clone();
-            let spawned_class_description = class_description.clone();
-            let spawned_maybe_class_setter = maybe_class_setter.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let response =
-                    match Request::post(&format!("/api/league/{league_id}/class/operation"))
-                        .json(&class_operation)
-                    {
-                        Ok(req) => req.send().await,
-                        Err(error) => {
-                            error!("Unable to set request body: {}", error);
-                            spawned_maybe_class_setter.set(Some(Err(error.to_string())));
-                            return;
-                        }
-                    };
-                match response {
-                    Ok(response) => {
-                        if response.ok() {
-                            let class: Class = match response.json().await {
-                                Ok(class) => {
-                                    spawned_class_name.set(String::new());
-                                    spawned_class_description.set(String::new());
-                                    class
-                                }
-                                Err(error) => {
-                                    error!("Unable to parse response: {}", error);
-                                    spawned_maybe_class_setter.set(Some(Err(error.to_string())));
-                                    return;
-                                }
-                            };
-                            debug!("Created class: {class:?}");
-                            spawned_maybe_class_setter.set(Some(Ok(class)));
-                        } else {
-                            error!("Failed to create class: {}", response.status());
-                            let error_text = match response.text().await {
-                                Ok(text) => text,
-                                Err(error) => error.to_string(),
-                            };
-                            spawned_maybe_class_setter.set(Some(Err(format!(
-                                "{} {}: {error_text}",
-                                response.status(),
-                                response.status_text(),
-                            ))));
-                        }
-                    }
-                    Err(error) => {
-                        error!("Unable to set request body: {}", error);
-                        spawned_maybe_class_setter.set(Some(Err(error.to_string())));
-                    }
-                }
-            });
+
+            let spawned_maybe_class_setter = maybe_class.setter();
+            wasm_bindgen_futures::spawn_local(perform_api_operation(
+                format!("/api/league/{league_id}/class/operation"),
+                class_operation,
+                spawned_maybe_class_setter,
+            ));
 
             is_creating.set(false);
+            if matches!(&*maybe_class, Some(Ok(_))) {
+                class_name.set(String::new());
+                class_description.set(String::new());
+            }
         })
     };
 
