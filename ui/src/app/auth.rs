@@ -59,6 +59,9 @@ pub fn auth_info_provider(props: &AuthInfoProviderProps) -> Html {
 
 #[function_component(AppLogin)]
 pub fn app_login() -> HtmlResult {
+    let force_update_trigger = use_force_update();
+    let force_update_signal = use_state_eq(|| false);
+
     let Some(auth_info) = use_context::<AuthInfoContext>() else {
         return Ok(html!({ "No AuthInfoContext" }));
     };
@@ -70,11 +73,17 @@ pub fn app_login() -> HtmlResult {
         auth_info.dispatch(Some(user.clone()));
     }
 
+    use_effect_with(force_update_signal.clone(), move |signal| {
+        if **signal {
+            force_update_trigger.force_update();
+        }
+    });
+
     Ok(html!(
         if auth_info.user.is_some() {
             <UserInfo />
         } else {
-            <LoginModalButton />
+            <LoginModalButton {force_update_signal} />
         }
     ))
 }
@@ -91,19 +100,27 @@ fn user_info() -> Html {
     html!({ format!("Welcome, {}!", user.username) })
 }
 
+#[derive(Debug, Clone, PartialEq, Properties)]
+struct LoginModalButtonProps {
+    pub force_update_signal: UseStateHandle<bool>,
+}
+
 #[function_component(LoginModalButton)]
-fn login_modal_button() -> Html {
+fn login_modal_button(props: &LoginModalButtonProps) -> Html {
     let Some(backdropper) = use_backdrop() else {
         return html!();
     };
 
     let onclick = {
+        let force_update_signal = props.force_update_signal.clone();
+
         Callback::from(move |event: MouseEvent| {
             event.prevent_default();
+            let force_update_signal = force_update_signal.clone();
 
-            backdropper.open(Backdrop::new(
-                html!(<LogInOrRegisterPanel backdropper={backdropper.clone()} />),
-            ));
+            backdropper.open(Backdrop::new(html!(
+                <LogInOrRegisterPanel backdropper={backdropper.clone()} {force_update_signal} />
+            )));
         })
     };
 
@@ -125,12 +142,14 @@ enum ModalState {
 
 #[derive(Clone, PartialEq, Properties)]
 struct LogInOrRegisterPanelProps {
-    pub backdropper: Backdropper,
+    pub backdropper:         Backdropper,
+    pub force_update_signal: UseStateHandle<bool>,
 }
 
 #[function_component(LogInOrRegisterPanel)]
 fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
     let backdropper = props.backdropper.clone();
+    let force_update_signal = props.force_update_signal.clone();
     let username = use_state_eq(String::new);
     let password = use_state_eq(String::new);
     let confirm_password = use_state_eq(String::new);
@@ -241,6 +260,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                     if let Some(auth_info) = auth_info.borrow() {
                         auth_info.dispatch(Some(user.clone()));
                     }
+                    force_update_signal.set(true);
                     (
                         AlertType::Success,
                         "Registration Successful",

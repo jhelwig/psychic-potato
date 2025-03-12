@@ -24,10 +24,7 @@ use crate::{
     app::{
         AppState,
         DbTransaction,
-        auth::{
-            AppAuthSession,
-            AuthenticatedUser,
-        },
+        auth::AuthenticatedUser,
     },
     error::AppError,
 };

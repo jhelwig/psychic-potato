@@ -25,7 +25,6 @@ use crate::app::{
     },
     auth::{
         AppLogin,
-        AuthInfo,
         AuthInfoProvider,
     },
     leagues::{
