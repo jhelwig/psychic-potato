@@ -72,11 +72,13 @@ pub struct LeagueListTableProps {
     pub leagues: Vec<League>,
 }
 
+#[remain::sorted]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum LeagueListTableColumn {
+    Actions,
+    CreatedAt,
     Id,
     Name,
-    CreatedAt,
 }
 
 impl TableEntryRenderer<LeagueListTableColumn> for League {
@@ -96,6 +98,14 @@ impl TableEntryRenderer<LeagueListTableColumn> for League {
             LeagueListTableColumn::CreatedAt => {
                 html!(self.created_at.format("%Y-%m-%d %H:%M:%S")).into()
             }
+            LeagueListTableColumn::Actions => {
+                html!(
+                    <Button variant={ButtonVariant::DangerSecondary}>
+                        { "Delete" }
+                    </Button>
+                )
+                .into()
+            }
         }
     }
 }
@@ -111,11 +121,12 @@ pub fn league_list_table(props: &LeagueListTableProps) -> Html {
             let mut entries_sorted = (*leagues_data).clone();
 
             match column.index {
-                LeagueListTableColumn::Id => entries_sorted.sort_by_key(|val| val.id),
+                // LeagueListTableColumn::Id => entries_sorted.sort_by_key(|val| val.id),
                 LeagueListTableColumn::Name => entries_sorted.sort_by_key(|val| val.name.clone()),
                 LeagueListTableColumn::CreatedAt => {
                     entries_sorted.sort_by_key(|val| val.created_at)
                 }
+                _ => {}
             }
 
             if matches!(column.order, Order::Descending) {
@@ -139,6 +150,7 @@ pub fn league_list_table(props: &LeagueListTableProps) -> Html {
                 index={LeagueListTableColumn::CreatedAt}
                 onsort={on_sort_by.clone()}
             />
+            <TableColumn<LeagueListTableColumn> index={LeagueListTableColumn::Actions} />
         </TableHeader<LeagueListTableColumn>>
     };
 
