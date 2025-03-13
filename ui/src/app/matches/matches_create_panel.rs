@@ -71,7 +71,7 @@ pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
             wasm_bindgen_futures::spawn_local(perform_api_operation(
                 format!("/api/league/{league_id}/match/operation"),
                 match_operation,
-                spawned_maybe_match_setter,
+                Some(spawned_maybe_match_setter),
             ));
 
             is_creating.set(false);

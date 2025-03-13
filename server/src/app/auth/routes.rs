@@ -87,11 +87,13 @@ pub async fn login(
     Err(AuthError::Unauthorized).context(HttpResponse::Unauthorized).map_err(Into::into)
 }
 
-pub async fn logout(AuthenticatedUser(auth_session): AuthenticatedUser) -> Result<(), AppError> {
+pub async fn logout(
+    AuthenticatedUser(auth_session): AuthenticatedUser,
+) -> Result<Json<String>, AppError> {
     if auth_session.current_user.is_some() {
         auth_session.logout_user();
 
-        Ok(())
+        Ok(Json("Logout Successful".to_string()))
     } else {
         Err(AuthError::Unauthorized).context(HttpResponse::Unauthorized).map_err(Into::into)
     }

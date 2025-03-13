@@ -74,7 +74,7 @@ pub fn class_create_panel(props: &ClassCreatePanelProps) -> HtmlResult {
             wasm_bindgen_futures::spawn_local(perform_api_operation(
                 format!("/api/league/{league_id}/class/operation"),
                 class_operation,
-                spawned_maybe_class_setter,
+                Some(spawned_maybe_class_setter),
             ));
 
             is_creating.set(false);

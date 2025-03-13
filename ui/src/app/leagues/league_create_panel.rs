@@ -53,7 +53,7 @@ pub fn create_league_panel() -> HtmlResult {
             wasm_bindgen_futures::spawn_local(perform_api_operation(
                 "/api/league/operation".to_string(),
                 league_operation,
-                spawned_maybe_league_setter.clone(),
+                Some(spawned_maybe_league_setter.clone()),
             ));
             is_creating.set(false);
             if matches!(&*maybe_league, Some(Ok(_))) {

@@ -9,7 +9,7 @@ use yew::prelude::*;
 pub async fn perform_api_operation<O, R>(
     api_endpoint: String,
     operation: O,
-    maybe_item_setter: UseStateSetter<Option<Result<R, String>>>,
+    maybe_item_setter: Option<UseStateSetter<Option<Result<R, String>>>>,
 ) where
     O: Clone + Serialize,
     R: for<'de> Deserialize<'de>,
@@ -18,7 +18,9 @@ pub async fn perform_api_operation<O, R>(
         Ok(req) => req.send().await,
         Err(error) => {
             error!("Unable to set request body: {}", error);
-            maybe_item_setter.set(Some(Err(error.to_string())));
+            if let Some(item_setter) = maybe_item_setter {
+                item_setter.set(Some(Err(error.to_string())));
+            }
             return;
         }
     };
@@ -27,11 +29,15 @@ pub async fn perform_api_operation<O, R>(
             if resp.ok() {
                 match resp.json().await {
                     Ok(result) => {
-                        maybe_item_setter.set(Some(Ok(result)));
+                        if let Some(item_setter) = maybe_item_setter {
+                            item_setter.set(Some(Ok(result)));
+                        }
                     }
                     Err(error) => {
                         error!("Unable to parse response: {error}");
-                        maybe_item_setter.set(Some(Err(error.to_string())));
+                        if let Some(item_setter) = maybe_item_setter {
+                            item_setter.set(Some(Err(error.to_string())));
+                        }
                     }
                 }
             } else {
@@ -40,16 +46,20 @@ pub async fn perform_api_operation<O, R>(
                     Err(error) => error.to_string(),
                 };
                 error!("Operation failed ({}): {error_body}", resp.status());
-                maybe_item_setter.set(Some(Err(format!(
-                    "{} {}: {error_body}",
-                    resp.status(),
-                    resp.status_text(),
-                ))));
+                if let Some(item_setter) = maybe_item_setter {
+                    item_setter.set(Some(Err(format!(
+                        "{} {}: {error_body}",
+                        resp.status(),
+                        resp.status_text(),
+                    ))));
+                }
             }
         }
         Err(error) => {
             error!("Error sending request: {error}");
-            maybe_item_setter.set(Some(Err(error.to_string())));
+            if let Some(item_setter) = maybe_item_setter {
+                item_setter.set(Some(Err(error.to_string())));
+            }
         }
     }
 }

@@ -73,23 +73,31 @@ pub fn app_login() -> HtmlResult {
         auth_info.dispatch(Some(user.clone()));
     }
 
+    let effect_force_update_signal = force_update_signal.clone();
     use_effect_with(force_update_signal.clone(), move |signal| {
         if **signal {
+            effect_force_update_signal.set(false);
             force_update_trigger.force_update();
         }
     });
 
     Ok(html!(
         if auth_info.user.is_some() {
-            <UserInfo />
+            <UserInfo force_update_signal={force_update_signal.clone()} />
         } else {
             <LoginModalButton {force_update_signal} />
         }
     ))
 }
 
+#[derive(Debug, Clone, PartialEq, Properties)]
+struct UserInfoProps {
+    pub force_update_signal: UseStateHandle<bool>,
+}
+
 #[function_component(UserInfo)]
-fn user_info() -> Html {
+fn user_info(props: &UserInfoProps) -> Html {
+    let force_update_signal = props.force_update_signal.clone();
     let Some(auth_info) = use_context::<AuthInfoContext>() else {
         return html!();
     };
@@ -97,7 +105,27 @@ fn user_info() -> Html {
         return html!();
     };
 
-    html!({ format!("Welcome, {}!", user.username) })
+    let onclick_logout = {
+        let auth_info = auth_info.clone();
+
+        Callback::from(move |_| {
+            wasm_bindgen_futures::spawn_local(perform_api_operation(
+                "/api/user/logout".to_string(),
+                serde_json::Value::Null,
+                Option::<UseStateSetter<Option<Result<String, String>>>>::None,
+            ));
+            auth_info.dispatch(None);
+            force_update_signal.set(true);
+        })
+    };
+
+    html!(
+        <Dropdown variant={MenuToggleVariant::Plain} text={user.username.clone()}>
+            <MenuAction onclick={onclick_logout}>
+                { "Log out" }
+            </MenuAction>
+        </Dropdown>
+    )
 }
 
 #[derive(Debug, Clone, PartialEq, Properties)]
@@ -226,7 +254,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                     wasm_bindgen_futures::spawn_local(perform_api_operation(
                         "/api/user/login".to_string(),
                         login_payload,
-                        spawned_maybe_user_setter,
+                        Some(spawned_maybe_user_setter),
                     ));
                 }
                 ModalState::Register => {
@@ -241,7 +269,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                         wasm_bindgen_futures::spawn_local(perform_api_operation(
                             "/api/user/register".to_string(),
                             register_payload,
-                            spawned_maybe_user_setter,
+                            Some(spawned_maybe_user_setter),
                         ));
                     } else {
                         debug!("Passwords do not match");
@@ -254,6 +282,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
     };
 
     use_effect_with(maybe_user.clone(), move |_| {
+        let backdropper = backdropper.clone();
         let (alert_type, title, body) = if let Some(user_result) = (*maybe_user).borrow() {
             match user_result {
                 Ok(user) => {
@@ -261,6 +290,7 @@ fn log_in_or_register_panel(props: &LogInOrRegisterPanelProps) -> Html {
                         auth_info.dispatch(Some(user.clone()));
                     }
                     force_update_signal.set(true);
+                    backdropper.close();
                     (
                         AlertType::Success,
                         "Registration Successful",
