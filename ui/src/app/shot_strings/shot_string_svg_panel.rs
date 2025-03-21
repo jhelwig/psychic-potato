@@ -61,8 +61,8 @@ const UNIT_SCALE_FACTOR: f64 = 10.0;
 
 #[function_component(ShotStringSvg)]
 fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
-    let render_width = 1200;
-    let render_height = 1200;
+    let render_width = 900;
+    let render_height = 900;
 
     struct RingDef {
         id:                 &'static str,
@@ -181,10 +181,27 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
     }
     let target = html!({ for rings });
 
+    let background_width = 60.0 * UNIT_SCALE_FACTOR;
+    let background_height = 60.0 * UNIT_SCALE_FACTOR;
+
+    let background_left = -background_width / 2.0;
+    let background_top = -background_height / 2.0;
+
+    let background = html!(
+        <rect
+            fill="lightgray"
+            x={background_left.to_string()}
+            y={background_top.to_string()}
+            width={background_width.to_string()}
+            height={background_height.to_string()}
+        />
+    );
+
     let mut sighters = Vec::new();
     let mut scored_shots = Vec::new();
     let mut shot_hover_boxes = Vec::new();
     let mut shot_hover_box_css = Vec::new();
+    let mut velocities = Vec::new();
 
     let mut min_scored_x = None;
     let mut min_scored_y = None;
@@ -196,11 +213,94 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
     let mut max_y = None;
 
     for shot in &*props.shot_string_shots {
-        let marker_radius = 0.308 / 2.0 * UNIT_SCALE_FACTOR;
-        let shot_x = shot.position.inch.x * UNIT_SCALE_FACTOR;
+        velocities.push(shot.velocity.fps);
+
+        let shot_x = shot_x(shot, UNIT_SCALE_FACTOR);
         // SVG and ShotMarker y-axis are inverted relative to each other.
-        let shot_y = -shot.position.inch.y * UNIT_SCALE_FACTOR;
-        let marker_stroke_width = 0.1; // * UNIT_SCALE_FACTOR;
+        let shot_y = shot_y(shot, UNIT_SCALE_FACTOR);
+
+        let curr_min_x = min_x.get_or_insert(shot_x);
+        if shot_x < *curr_min_x {
+            *curr_min_x = shot_x;
+        }
+        let curr_min_y = min_y.get_or_insert(shot_y);
+        if shot_y < *curr_min_y {
+            *curr_min_y = shot_y;
+        }
+        let curr_max_x = max_x.get_or_insert(shot_x);
+        if shot_x > *curr_max_x {
+            *curr_max_x = shot_x;
+        }
+        let curr_max_y = max_y.get_or_insert(shot_y);
+        if shot_y > *curr_max_y {
+            *curr_max_y = shot_y;
+        }
+
+        if !shot.tags.contains("sighter") {
+            let curr_min_x = min_scored_x.get_or_insert(shot_x);
+            if shot_x < *curr_min_x {
+                *curr_min_x = shot_x;
+            }
+            let curr_min_y = min_scored_y.get_or_insert(shot_y);
+            if shot_y < *curr_min_y {
+                *curr_min_y = shot_y;
+            }
+            let curr_max_x = max_scored_x.get_or_insert(shot_x);
+            if shot_x > *curr_max_x {
+                *curr_max_x = shot_x;
+            }
+            let curr_max_y = max_scored_y.get_or_insert(shot_y);
+            if shot_y > *curr_max_y {
+                *curr_max_y = shot_y;
+            }
+        }
+    }
+
+    let (view_left, view_top, view_width, view_height) = if let (
+        Some(min_x),
+        Some(min_y),
+        Some(max_x),
+        Some(max_y),
+    ) = (min_x, min_y, max_x, max_y)
+    {
+        let view_max_dimension = (max_x - min_x).max(max_y - min_y);
+        let view_center_x = (max_x + min_x) / 2.0;
+        let view_center_y = (max_y + min_y) / 2.0;
+        let view_width = view_max_dimension * 1.5;
+        let view_height = view_max_dimension * 1.5;
+        let view_left = view_center_x - view_width / 2.0;
+        let view_top = view_center_y - view_height / 2.0;
+
+        (view_left, view_top, view_width, view_height)
+    } else {
+        (background_left, background_top, background_width, background_height)
+    };
+    let view_box = format!("{view_left} {view_top} {view_width} {view_height}");
+
+    let velocity_avg = velocities.iter().sum::<u32>() as f64 / velocities.len() as f64;
+
+    let (hover_box_top, hover_box_left, hover_box_width, hover_box_height) = {
+        let hover_box_width = 0.20 * view_width;
+        let hover_box_height = 0.15 * view_height;
+        let hover_box_left = view_left;
+        let hover_box_top = view_top;
+
+        (hover_box_top, hover_box_left, hover_box_width, hover_box_height)
+    };
+    let hover_box_text_line_height = hover_box_height / 7.0;
+    let hover_box_font_size = 0.75 * hover_box_text_line_height;
+    let hover_box_text_x = hover_box_left + hover_box_width * 0.05;
+    let hover_box_line_one_y = hover_box_top + hover_box_text_line_height;
+    let hover_box_line_two_y = hover_box_line_one_y + hover_box_text_line_height;
+    let hover_box_line_three_y = hover_box_line_two_y + hover_box_text_line_height;
+    let hover_box_line_four_y = hover_box_line_three_y + hover_box_text_line_height;
+
+    for shot in &*props.shot_string_shots {
+        let marker_radius = 0.308 / 2.0 * UNIT_SCALE_FACTOR;
+        let shot_x = shot_x(shot, UNIT_SCALE_FACTOR);
+        // SVG and ShotMarker y-axis are inverted relative to each other.
+        let shot_y = shot_y(shot, UNIT_SCALE_FACTOR);
+        let marker_stroke_width = 0.1;
 
         let fill_color = if shot.tags == "sighter" {
             "DimGray"
@@ -238,37 +338,22 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
         let css_shot_hover_id = format!("shot_hover_{}", shot.shot_id);
 
         let shot_hover = {
-            let hover_box_width = 5.0 * marker_radius;
-            let hover_box_height = 3.0 * marker_radius;
-            let hover_box_x = if shot_x.is_sign_positive() {
-                shot_x - (marker_radius + hover_box_width)
-            } else {
-                shot_x + marker_radius
-            };
-            let hover_box_y = if shot_y.is_sign_positive() {
-                shot_y - (2.0 * marker_radius)
-            } else {
-                shot_y - marker_radius
-            };
-            let text_line_height = hover_box_height / 4.0;
-            let text_x = hover_box_x + hover_box_width * 0.05;
-            let line_one_y = hover_box_y + text_line_height;
-            let line_two_y = line_one_y + text_line_height;
+            let shot_deviation_fps = shot.velocity.fps as f64 - velocity_avg;
 
             html!(
                 <g id={css_shot_hover_id.clone()} class="shot_hover">
                     <rect
                         fill="DarkSlateGray"
-                        x={hover_box_x.to_string()}
-                        y={hover_box_y.to_string()}
+                        x={hover_box_left.to_string()}
+                        y={hover_box_top.to_string()}
                         width={hover_box_width.to_string()}
                         height={hover_box_height.to_string()}
                     />
                     <text
-                        x={text_x.to_string()}
-                        y={line_one_y.to_string()}
+                        x={hover_box_text_x.to_string()}
+                        y={hover_box_line_one_y.to_string()}
                         fill="white"
-                        font-size="1"
+                        font-size={hover_box_font_size.to_string()}
                         stroke="white"
                         stroke-width="0.05"
                         text-anchor="left"
@@ -278,10 +363,10 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
                         { format!("Shot: {}", shot.shot_id) }
                     </text>
                     <text
-                        x={text_x.to_string()}
-                        y={line_two_y.to_string()}
+                        x={hover_box_text_x.to_string()}
+                        y={hover_box_line_two_y.to_string()}
                         fill="white"
-                        font-size="1"
+                        font-size={hover_box_font_size.to_string()}
                         stroke="white"
                         stroke-width="0.05"
                         text-anchor="left"
@@ -289,6 +374,32 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
                         align-baseline="bottom"
                     >
                         { format!("Score: {}", shot.score) }
+                    </text>
+                    <text
+                        x={hover_box_text_x.to_string()}
+                        y={hover_box_line_three_y.to_string()}
+                        fill="white"
+                        font-size={hover_box_font_size.to_string()}
+                        stroke="white"
+                        stroke-width="0.05"
+                        text-anchor="left"
+                        dominant-baseline="bottom"
+                        align-baseline="bottom"
+                    >
+                        { format!("{} fps ({:+.2})", shot.velocity.fps, shot_deviation_fps) }
+                    </text>
+                    <text
+                        x={hover_box_text_x.to_string()}
+                        y={hover_box_line_four_y.to_string()}
+                        fill="white"
+                        font-size={hover_box_font_size.to_string()}
+                        stroke="white"
+                        stroke-width="0.05"
+                        text-anchor="left"
+                        dominant-baseline="bottom"
+                        align-baseline="bottom"
+                    >
+                        { format!("{} in., {} in.", shot.position.inch.x, shot.position.inch.y) }
                     </text>
                 </g>
             )
@@ -305,78 +416,12 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
         shot_hover_box_css
             .push(format!("#{css_shot_id}:hover ~ #{css_shot_hover_id} {{ display: block; }}"));
 
-        let curr_min_x = min_x.get_or_insert(shot_x);
-        if shot_x < *curr_min_x {
-            *curr_min_x = shot_x;
-        }
-        let curr_min_y = min_y.get_or_insert(shot_y);
-        if shot_y < *curr_min_y {
-            *curr_min_y = shot_y;
-        }
-        let curr_max_x = max_x.get_or_insert(shot_x);
-        if shot_x > *curr_max_x {
-            *curr_max_x = shot_x;
-        }
-        let curr_max_y = max_y.get_or_insert(shot_y);
-        if shot_y > *curr_max_y {
-            *curr_max_y = shot_y;
-        }
-
-        if shot.tags == "sighter" {
+        if shot.tags.contains("sighter") {
             sighters.push(shot_group);
         } else {
             scored_shots.push(shot_group);
-
-            let curr_min_x = min_scored_x.get_or_insert(shot_x);
-            if shot_x < *curr_min_x {
-                *curr_min_x = shot_x;
-            }
-            let curr_min_y = min_scored_y.get_or_insert(shot_y);
-            if shot_y < *curr_min_y {
-                *curr_min_y = shot_y;
-            }
-            let curr_max_x = max_scored_x.get_or_insert(shot_x);
-            if shot_x > *curr_max_x {
-                *curr_max_x = shot_x;
-            }
-            let curr_max_y = max_scored_y.get_or_insert(shot_y);
-            if shot_y > *curr_max_y {
-                *curr_max_y = shot_y;
-            }
         }
     }
-
-    let background_width = 60.0 * UNIT_SCALE_FACTOR;
-    let background_height = 60.0 * UNIT_SCALE_FACTOR;
-
-    let background_left = -background_width / 2.0;
-    let background_top = -background_height / 2.0;
-
-    let background = html!(
-        <rect
-            fill="lightgray"
-            x={background_left.to_string()}
-            y={background_top.to_string()}
-            width={background_width.to_string()}
-            height={background_height.to_string()}
-        />
-    );
-
-    let view_box = if let (Some(min_x), Some(min_y), Some(max_x), Some(max_y)) =
-        (min_x, min_y, max_x, max_y)
-    {
-        let view_max_dimension = (max_x - min_x).max(max_y - min_y);
-        let view_center_x = (max_x + min_x) / 2.0;
-        let view_center_y = (max_y + min_y) / 2.0;
-        let view_width = view_max_dimension * 1.5;
-        let view_height = view_max_dimension * 1.5;
-        let view_left = view_center_x - view_width / 2.0;
-        let view_top = view_center_y - view_height / 2.0;
-
-        format!("{view_left} {view_top} {view_width} {view_height}")
-    } else {
-        format!("{background_left} {background_top} {background_width} {background_height}")
-    };
 
     html!(
         <>
@@ -399,6 +444,10 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
         </>
     )
 }
+
+fn shot_x(shot: &ShotMarkerShot, scale_factor: f64) -> f64 { shot.position.inch.x * scale_factor }
+
+fn shot_y(shot: &ShotMarkerShot, scale_factor: f64) -> f64 { -shot.position.inch.y * scale_factor }
 
 #[allow(clippy::too_many_arguments)]
 fn target_ring(
