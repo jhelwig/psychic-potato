@@ -48,6 +48,8 @@ pub mod classes;
 pub mod export;
 pub mod leagues;
 pub mod matches;
+pub mod shots;
+pub mod strings;
 
 #[derive(Debug, Clone)]
 pub struct AppState {

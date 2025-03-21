@@ -7,10 +7,7 @@ use axum::{
         post,
     },
 };
-use log::{
-    error,
-    info,
-};
+use log::error;
 use shared_types::response::User;
 use uuid::Uuid;
 
@@ -45,7 +42,6 @@ pub async fn get_current_user(
     let Some(user) = auth_session.current_user else {
         return Err(AuthError::NotLoggedIn).context(HttpResponse::Unauthorized).map_err(Into::into);
     };
-    info!("Current user: {:?}", &user);
 
     Ok(Json(user.into()))
 }
@@ -65,7 +61,6 @@ pub async fn login(
     .await?;
 
     let Some(user) = maybe_user else {
-        info!("User not found: {}", username);
         return Err(AuthError::Unauthorized)
             .context(HttpResponse::Unauthorized)
             .map_err(Into::into);
@@ -76,7 +71,6 @@ pub async fn login(
         .context(AuthError::Unauthorized)
         .context(HttpResponse::Unauthorized)?
     {
-        info!("User logged in: {}", username);
         auth_session.login_user(user.id);
         auth_session.remember_user(true);
 

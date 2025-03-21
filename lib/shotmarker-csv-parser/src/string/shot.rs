@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 use crate::units::{
     Inches,
     Mil,
@@ -62,9 +64,44 @@ pub struct ShotPosition {
 }
 
 #[remain::sorted]
-#[derive(Debug, Copy, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum ShotScore {
     None,
     Numeric(u8),
     X,
 }
+
+impl std::fmt::Display for ShotScore {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::None => write!(f, "None"),
+            Self::Numeric(n) => write!(f, "{}", n),
+            Self::X => write!(f, "X"),
+        }
+    }
+}
+
+impl Ord for ShotScore {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (ShotScore::None, ShotScore::None) | (ShotScore::X, ShotScore::X) => Ordering::Equal,
+            (ShotScore::Numeric(a), ShotScore::Numeric(b)) => a.cmp(b),
+            (ShotScore::None, ShotScore::Numeric(_))
+            | (ShotScore::None, ShotScore::X)
+            | (ShotScore::Numeric(_), ShotScore::X) => Ordering::Less,
+            (ShotScore::Numeric(_), ShotScore::None)
+            | (ShotScore::X, ShotScore::None)
+            | (ShotScore::X, ShotScore::Numeric(_)) => Ordering::Greater,
+        }
+    }
+}
+
+impl PartialOrd for ShotScore {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
+}
+
+impl PartialEq for ShotScore {
+    fn eq(&self, other: &Self) -> bool { self.cmp(other) == Ordering::Equal }
+}
+
+impl Eq for ShotScore {}

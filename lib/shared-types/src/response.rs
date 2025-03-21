@@ -8,7 +8,8 @@ use serde::{
     Deserialize,
     Serialize,
 };
-use shotmarker_csv_parser::string::shot::{
+use shotmarker_csv_parser::string::StringScore;
+pub use shotmarker_csv_parser::string::shot::{
     ShotPosition,
     ShotScore,
     ShotVelocity,
@@ -32,7 +33,7 @@ pub struct Match {
     pub event_date: NaiveDate,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ShotMarkerExport {
     pub id:             Uuid,
     pub file_name:      String,
@@ -49,7 +50,7 @@ pub struct ShotMarkerShotString {
     pub string_name: String,
     pub target:      String,
     pub distance:    String,
-    pub score:       String,
+    pub score:       StringScore,
     pub export_id:   Uuid,
     pub shooter_id:  Option<Uuid>,
     pub class_id:    Option<Uuid>,

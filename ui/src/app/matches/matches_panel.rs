@@ -11,8 +11,8 @@ use crate::app::{
     leagues::LeagueRoute,
     matches::{
         MatchesRoute,
+        match_list_panel::MatchesListPanel,
         matches_create_panel::MatchesCreatePanel,
-        matches_list_panel::MatchesListPanel,
     },
 };
 
@@ -36,12 +36,10 @@ pub fn matches_panel(props: &MatchesPanelProps) -> Html {
 }
 
 pub fn switch_matches_panel(league: Rc<League>, target: MatchesRoute) -> Html {
-    let route = match target {
+    match target {
         MatchesRoute::Index => {
             html!(<MatchesListPanel {league} />)
         }
         MatchesRoute::Create => html!(<MatchesCreatePanel {league} />),
-    };
-
-    html!({ route })
+    }
 }

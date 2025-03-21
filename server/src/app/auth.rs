@@ -68,6 +68,28 @@ where
     }
 }
 
+pub struct UnauthenticatedUser(pub AppAuthSession);
+
+impl<S> FromRequestParts<S> for UnauthenticatedUser
+where
+    AppState: FromRef<S>,
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let auth_session = AppAuthSession::from_request_parts(parts, state).await.map_err(
+            |(status_code, error_body)| anyhow!("Auth failed ({status_code}): {error_body}"),
+        )?;
+
+        if auth_session.current_user.is_none() {
+            Ok(Self(auth_session))
+        } else {
+            Err(AuthError::Unauthorized).context(HttpResponse::Unauthorized).map_err(Into::into)
+        }
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum AuthError {
     #[error("DB connection pool not found")]

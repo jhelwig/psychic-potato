@@ -1,5 +1,6 @@
 use anyhow::Result;
 use gloo_net::http::Request;
+use log::info;
 use patternfly_yew::prelude::*;
 use shared_types::response::League;
 use yew::{
@@ -88,7 +89,7 @@ impl TableEntryRenderer<LeagueListTableColumn> for League {
             LeagueListTableColumn::Name => {
                 html!(
                     <Link<AppRoute>
-                        to={AppRoute::League { league_id: self.id, page: LeagueRoute::Details}}
+                        to={AppRoute::League { league_id: self.id, page: LeagueRoute::Details }}
                     >
                         { self.name.clone() }
                     </Link<AppRoute>>
@@ -96,15 +97,23 @@ impl TableEntryRenderer<LeagueListTableColumn> for League {
                 .into()
             }
             LeagueListTableColumn::CreatedAt => {
-                html!(self.created_at.format("%Y-%m-%d %H:%M:%S")).into()
+                Cell::from(html!(self.created_at.format("%Y-%m-%d %H:%M:%S")))
+                    .text_modifier(TextModifier::NoWrap)
             }
             LeagueListTableColumn::Actions => {
-                html!(
-                    <Button variant={ButtonVariant::DangerSecondary}>
+                let onclick = {
+                    let league_id = self.id;
+
+                    Callback::from(move |_| {
+                        info!("Clicked delete! League ID: {}", league_id);
+                    })
+                };
+                Cell::from(html!(
+                    <Button variant={ButtonVariant::DangerSecondary} {onclick}>
                         { "Delete" }
                     </Button>
-                )
-                .into()
+                ))
+                .text_modifier(TextModifier::NoWrap)
             }
         }
     }
@@ -142,15 +151,22 @@ pub fn league_list_table(props: &LeagueListTableProps) -> Html {
         <TableHeader<LeagueListTableColumn>>
             <TableColumn<LeagueListTableColumn>
                 label="Name"
+                width={ColumnWidth::WidthMax}
                 index={LeagueListTableColumn::Name}
                 onsort={on_sort_by.clone()}
             />
             <TableColumn<LeagueListTableColumn>
                 label="Created At"
+                width={ColumnWidth::FitContent}
+                text_modifier={TextModifier::NoWrap}
                 index={LeagueListTableColumn::CreatedAt}
                 onsort={on_sort_by.clone()}
             />
-            <TableColumn<LeagueListTableColumn> index={LeagueListTableColumn::Actions} />
+            <TableColumn<LeagueListTableColumn>
+                width={ColumnWidth::FitContent}
+                text_modifier={TextModifier::NoWrap}
+                index={LeagueListTableColumn::Actions}
+            />
         </TableHeader<LeagueListTableColumn>>
     };
 

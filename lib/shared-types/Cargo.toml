@@ -8,6 +8,7 @@ publish.workspace = true
 
 [dependencies]
 chrono         = { workspace = true }
+chrono-tz      = { workspace = true }
 patternfly-yew = { workspace = true, optional = true }
 remain         = { workspace = true }
 serde          = { workspace = true }

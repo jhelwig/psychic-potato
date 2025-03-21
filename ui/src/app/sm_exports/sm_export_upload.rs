@@ -5,6 +5,7 @@ use gloo_utils::format::JsValueSerdeExt;
 use log::info;
 use patternfly_yew::prelude::*;
 use shared_types::{
+    self,
     request::SmCsvExportUpload,
     response::{
         League,
@@ -67,6 +68,7 @@ pub fn sm_export_upload(props: &SmExportUploadProps) -> Html {
     };
 
     let processing = {
+        let drop_content_setter = drop_content.setter();
         let upload_progress = upload_progress.setter();
         use_async_with_cloned_deps(
             move |content| {
@@ -114,6 +116,7 @@ pub fn sm_export_upload(props: &SmExportUploadProps) -> Html {
                                 }
                             }
 
+                            drop_content_setter.set(None);
                             Ok("File(s) uploaded successfully.".to_string())
                         }
                         None => Err("No files selected.".to_string()),

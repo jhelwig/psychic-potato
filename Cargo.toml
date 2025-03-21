@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members  = ["lib/*", "server", "ui", "xtask"]
+members  = ["lib/*", "server", "ui", "xtask", "lib/*/examples/*"]
 
 [workspace.package]
 authors = ["Jacob Helwig <jacob@technosorcery.net>"]
@@ -14,7 +14,7 @@ publish = false
 # nom-tracer = { version = "1.0.1", features = ["trace-color", "trace-context"] }
 anyhow       = { version = "1.0.97" }
 argon2       = { version = "0.5.3" }
-async-trait  = { version = "0.1.87" }
+async-trait  = { version = "0.1.88" }
 axum         = { version = "0.8.1", features = ["tower-log", "tracing"] }
 axum_session = { version = "0.16.0" }
 # axum_session_auth    = { version = "0.16.0", features = ["rest_mode"] }
@@ -23,6 +23,7 @@ axum_session_sqlx    = { version = "0.5.0", features = ["sqlite", "tls-rustls"] 
 browser-panic-hook   = { version = "0.2.0" }
 cfg-if               = { version = "1.0.0" }
 chrono               = { version = "0.4.40", features = ["serde"] }
+chrono-tz            = { version = "0.10.1", features = ["serde"] }
 gloo-net             = { version = "0.6.0" }
 gloo-utils           = { version = "0.2.0" }
 log                  = { version = "0.4.26" }
@@ -32,20 +33,20 @@ nom                  = { version = "8.0.0" }
 password-hash        = { version = "0.5.0", features = ["alloc", "std"] }
 patternfly-yew       = { version = "0.6.3", features = ["tree", "icons-fab"] }
 remain               = { version = "0.2.15" }
-serde                = { version = "1.0.218", features = ["derive"] }
+serde                = { version = "1.0.219", features = ["derive"] }
 serde_json           = { version = "1.0.140" }
 sqlx                 = { version = "0.8.3", features = ["runtime-tokio-rustls", "sqlite", "chrono", "uuid"] }
 thiserror            = { version = "2.0.12" }
-tokio                = { version = "1.44.0", features = ["full"] }
+tokio                = { version = "1.44.1", features = ["full"] }
 tower                = { version = "0.5.2", features = ["util"] }
 tracing              = { version = "0.1.41" }
 tracing-subscriber   = { version = "0.3.19", features = ["env-filter", "registry"] }
-ulid                 = { version = "1.1.4" }
-uuid                 = { version = "1.15.1", features = ["serde", "v4"] }
+ulid                 = { version = "1.2.0" }
+uuid                 = { version = "1.16.0", features = ["serde", "v4"] }
 wasm-bindgen         = { version = "0.2.100" }
 wasm-bindgen-futures = { version = "0.4.50" }
 wasm-logger          = { version = "0.2.0" }
-yew                  = { version = "0.21", features = ["csr"] }
+yew                  = { version = "0.21.0", features = ["csr"] }
 yew-hooks            = { version = "0.3.3" }
 yew-more-hooks       = { version = "0.3.3" }
 yew-nested-router    = { version = "0.7.2" }
@@ -57,6 +58,8 @@ features = ["compression-full", "cors", "decompression-full", "limit", "set-head
 [workspace.dependencies.web-sys]
 version = "0.3.77"
 features = [
+  "Document",
+  "Element",
   "Headers",
   "HtmlElement",
   "HtmlInputElement",

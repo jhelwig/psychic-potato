@@ -28,7 +28,7 @@ use crate::app::{
     },
     matches::{
         MatchesRoute,
-        match_details_panel::MatchDetailsPanel,
+        match_panel::MatchPanel,
         matches_panel::MatchesPanel,
     },
     shooters::{
@@ -150,7 +150,7 @@ pub fn switch_league_panel(league: Rc<League>, target: LeagueRoute) -> Html {
         } => {
             html!(
                 <Suspense fallback="Loading match...">
-                    <MatchDetailsPanel {league} {match_id} />
+                    <MatchPanel {league} {match_id} />
                 </Suspense>
             )
         }

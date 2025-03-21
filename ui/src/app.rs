@@ -16,7 +16,8 @@ pub mod classes;
 pub mod leagues;
 pub mod matches;
 pub mod shooters;
-pub mod sm_upload;
+pub mod shot_strings;
+pub mod sm_exports;
 
 use crate::app::{
     admin::{

@@ -83,10 +83,10 @@ fn export_parser_different_dates() {
 #[test]
 fn example_files() {
     let example_file_contents = [
-        include_str!("../../examples/SM_shotslog_Jan_07.csv"),
-        include_str!("../../examples/SM_shotslog_Jan_14.csv"),
-        include_str!("../../examples/SM_shotslog_Jan_21.csv"),
-        include_str!("../../examples/SM_shotslog_Jan_28.csv"),
+        include_str!("../../example-files/SM_shotslog_Jan_07.csv"),
+        include_str!("../../example-files/SM_shotslog_Jan_14.csv"),
+        include_str!("../../example-files/SM_shotslog_Jan_21.csv"),
+        include_str!("../../example-files/SM_shotslog_Jan_28.csv"),
     ];
     for (idx, example_file_content) in example_file_contents.iter().enumerate() {
         let start_time = Instant::now();

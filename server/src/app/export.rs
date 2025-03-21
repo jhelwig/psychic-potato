@@ -16,16 +16,29 @@ use shared_types::{
     request::SmCsvExportUpload,
     response::ShotMarkerExport,
 };
+use thiserror::Error;
 use tower_http::limit::RequestBodyLimitLayer;
 use uuid::Uuid;
 
-use crate::app::{
-    AppState,
-    DbTransaction,
+use crate::{
+    app::{
+        AppState,
+        DbTransaction,
+    },
+    error::AppError,
 };
+
+#[derive(Debug, Error)]
+pub enum ShotMarkerExportError {
+    #[error("Export not found: {export_id}")]
+    NotFound {
+        export_id: Uuid,
+    },
+}
 
 pub fn router(app_state: AppState) -> Router<AppState> {
     Router::new().route("/", get(list_exports))
+    .route("/{export_id}", get(get_export))
     .route("/upload", post(upload_export))
     .layer(DefaultBodyLimit::disable())
     .layer(RequestBodyLimitLayer::new(1024 * 1024 * 10)) // 10MB)
@@ -34,12 +47,42 @@ pub fn router(app_state: AppState) -> Router<AppState> {
 
 pub async fn list_exports(
     DbTransaction(mut txn): DbTransaction<'_>,
+    Path((league_id, match_id)): Path<(Uuid, Uuid)>,
 ) -> Result<Json<Vec<ShotMarkerExport>>, crate::error::AppError> {
-    let exports = sqlx::query_file_as!(ShotMarkerExport, "queries/export/list_exports.sql",)
-        .fetch_all(&mut *txn)
-        .await?;
+    let exports = sqlx::query_file_as!(
+        ShotMarkerExport,
+        "queries/export/list_exports.sql",
+        league_id,
+        match_id
+    )
+    .fetch_all(&mut *txn)
+    .await?;
 
     Ok(Json(exports))
+}
+
+pub async fn get_export(
+    DbTransaction(mut txn): DbTransaction<'_>,
+    Path((league_id, match_id, export_id)): Path<(Uuid, Uuid, Uuid)>,
+) -> Result<Json<ShotMarkerExport>, AppError> {
+    let export = sqlx::query_file_as!(
+        ShotMarkerExport,
+        "queries/export/get_export.sql",
+        league_id,
+        match_id,
+        export_id
+    )
+    .fetch_optional(&mut *txn)
+    .await?;
+
+    let Some(export) = export else {
+        return Err(ShotMarkerExportError::NotFound {
+            export_id,
+        }
+        .into());
+    };
+
+    Ok(Json(export))
 }
 
 pub async fn upload_export(
@@ -88,7 +131,7 @@ pub async fn upload_export(
         let name = shot_string.name.clone();
         let target = shot_string.target.clone();
         let distance = shot_string.distance.clone();
-        let score = shot_string.score.clone();
+        let score = serde_json::to_value(shot_string.score.clone())?;
         sqlx::query_file!(
             "queries/shot_strings/create_shot_string.sql",
             shot_string_id,

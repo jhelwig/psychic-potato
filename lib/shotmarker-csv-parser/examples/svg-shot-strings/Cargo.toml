@@ -1,0 +1,17 @@
+[package]
+name              = "svg-shot-strings"
+authors.workspace = true
+license.workspace = true
+edition.workspace = true
+version.workspace = true
+publish.workspace = true
+
+[dependencies]
+anyhow             = { workspace = true }
+clap               = { version = "4.5.32", features = ["color", "derive", "deprecated"] }
+log                = { workspace = true }
+svg                = { version = "0.18.0" }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+shotmarker-csv-parser = { path = "../../../shotmarker-csv-parser" }

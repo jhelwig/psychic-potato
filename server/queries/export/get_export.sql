@@ -5,7 +5,7 @@ SELECT exports.id AS "id!: uuid::Uuid",
   exports.string_date AS "string_date!: chrono::NaiveDate",
   exports.match_id AS "match_id!: uuid::Uuid"
 FROM exports
-  INNER JOIN matches ON matches.id = exports.match_id
+  INNER JOIN matches ON exports.match_id = matches.id
 WHERE matches.league_id = $1
   AND matches.id = $2
-ORDER BY generated_date
+  AND exports.id = $3

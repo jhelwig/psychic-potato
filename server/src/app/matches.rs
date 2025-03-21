@@ -45,6 +45,7 @@ fn single_league_match_router(app_state: AppState) -> Router<AppState> {
     Router::new()
         .route("/", get(get_league_match))
         .nest("/export", crate::app::export::router(app_state.clone()))
+        .nest("/string", crate::app::strings::router(app_state.clone()))
         .with_state(app_state)
 }
 

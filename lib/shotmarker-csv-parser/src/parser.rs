@@ -10,7 +10,6 @@ use nom::{
     bytes::complete::{
         tag,
         tag_no_case,
-        take_till,
         take_until,
     },
     character::complete::space1,
@@ -38,6 +37,7 @@ use crate::{
     string::{
         ShotMarkerShotString,
         ShotMarkerStringMetrics,
+        StringScore,
         shot::{
             ShotMarkerShot,
             ShotPosition,
@@ -132,7 +132,7 @@ fn shot_string_parser(input: &str) -> IResult<&str, ShotMarkerShotString> {
 ///   Date, Name, Target, Distance, Score
 fn shot_string_header_parser(
     input: &str,
-) -> IResult<&str, (NaiveDate, String, String, String, String)> {
+) -> IResult<&str, (NaiveDate, String, String, String, StringScore)> {
     let (rest, date) = ws(date_parser).parse(input)?;
     let (rest, _) = tag(",")(rest)?;
     let (rest, name) = ws(take_until(",")).parse(rest)?;
@@ -141,7 +141,7 @@ fn shot_string_header_parser(
     let (rest, _) = tag(",")(rest)?;
     let (rest, distance) = ws(take_until(",")).parse(rest)?;
     let (rest, _) = tag(",")(rest)?;
-    let (rest, score) = ws(take_till(|c| c == '\r' || c == '\n')).parse(rest)?;
+    let (rest, score) = ws(parse_string_score).parse(rest)?;
 
     // Individual shot field header.
     let (rest, _) = ws(tag(",time,id,tags,score,x (mm),y (mm),x (inch),y (inch),x (moa),y (moa),x (mil),y (mil),v (m/s),v (fps),yaw (deg), pitch (deg),quality")).parse(rest)?;
@@ -323,6 +323,20 @@ fn month_parser(input: &str) -> IResult<&str, u32> {
 fn month_day_parser(input: &str) -> IResult<&str, u32> { nom::character::complete::u32(input) }
 
 fn year_parser(input: &str) -> IResult<&str, i32> { nom::character::complete::i32(input) }
+
+fn parse_string_score(input: &str) -> IResult<&str, StringScore> {
+    let (rest, points) = nom::character::complete::u32(input)?;
+    let (rest, _) = tag_no_case("-")(rest)?;
+    let (rest, x_count) = nom::character::complete::u32(rest)?;
+    let (rest, _) = tag_no_case("X")(rest)?;
+
+    let string_score = StringScore {
+        points,
+        x_count,
+    };
+
+    Ok((rest, string_score))
+}
 
 fn parse_shot_score(input: &str) -> IResult<&str, ShotScore> {
     let (rest, score) = opt(alt((parse_shot_score_x, parse_shot_score_numeric))).parse(input)?;
