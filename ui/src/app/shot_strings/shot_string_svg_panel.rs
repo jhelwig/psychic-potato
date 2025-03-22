@@ -277,7 +277,11 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
     };
     let view_box = format!("{view_left} {view_top} {view_width} {view_height}");
 
-    let velocity_avg = velocities.iter().sum::<u32>() as f64 / velocities.len() as f64;
+    let velocity_avg = mean(&velocities);
+    let velocity_sd = std_deviation(&velocities);
+    let velocity_min = velocities.iter().fold(f64::MAX, |acc, &v| f64::min(acc, v as f64));
+    let velocity_max = velocities.iter().fold(f64::MIN, |acc, &v| f64::max(acc, v as f64));
+    let velocity_es = velocity_max - velocity_min;
 
     let (hover_box_top, hover_box_left, hover_box_width, hover_box_height) = {
         let hover_box_width = 0.20 * view_width;
@@ -294,6 +298,8 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
     let hover_box_line_two_y = hover_box_line_one_y + hover_box_text_line_height;
     let hover_box_line_three_y = hover_box_line_two_y + hover_box_text_line_height;
     let hover_box_line_four_y = hover_box_line_three_y + hover_box_text_line_height;
+    let hover_box_line_five_y = hover_box_line_four_y + hover_box_text_line_height;
+    let hover_box_line_six_y = hover_box_line_five_y + hover_box_text_line_height;
 
     for shot in &*props.shot_string_shots {
         let marker_radius = 0.308 / 2.0 * UNIT_SCALE_FACTOR;
@@ -386,7 +392,7 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
                         dominant-baseline="bottom"
                         align-baseline="bottom"
                     >
-                        { format!("{} fps ({:+.2})", shot.velocity.fps, shot_deviation_fps) }
+                        { format!("{} in., {} in.", shot.position.inch.x, shot.position.inch.y) }
                     </text>
                     <text
                         x={hover_box_text_x.to_string()}
@@ -399,7 +405,33 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
                         dominant-baseline="bottom"
                         align-baseline="bottom"
                     >
-                        { format!("{} in., {} in.", shot.position.inch.x, shot.position.inch.y) }
+                        { format!("{} fps", shot.velocity.fps) }
+                    </text>
+                    <text
+                        x={hover_box_text_x.to_string()}
+                        y={hover_box_line_five_y.to_string()}
+                        fill="white"
+                        font-size={hover_box_font_size.to_string()}
+                        stroke="white"
+                        stroke-width="0.05"
+                        text-anchor="left"
+                        dominant-baseline="bottom"
+                        align-baseline="bottom"
+                    >
+                        { format!("Avg: {:.2} ({:+.2})", velocity_avg, shot_deviation_fps) }
+                    </text>
+                    <text
+                        x={hover_box_text_x.to_string()}
+                        y={hover_box_line_six_y.to_string()}
+                        fill="white"
+                        font-size={hover_box_font_size.to_string()}
+                        stroke="white"
+                        stroke-width="0.05"
+                        text-anchor="left"
+                        dominant-baseline="bottom"
+                        align-baseline="bottom"
+                    >
+                        { format!("SD: {:.2}, ES: {}", velocity_sd, velocity_es) }
                     </text>
                 </g>
             )
@@ -511,4 +543,27 @@ fn ring_label(
             { label.to_string() }
         </text>
     )
+}
+
+fn mean(data: &[u32]) -> f64 {
+    let sum = data.iter().sum::<u32>() as f64;
+    let count = data.len();
+
+    sum / count as f64
+}
+
+fn std_deviation(data: &[u32]) -> f64 {
+    let data_mean = mean(data);
+    let count = data.len();
+    let variance = data
+        .iter()
+        .map(|value| {
+            let diff = data_mean - (*value as f64);
+
+            diff * diff
+        })
+        .sum::<f64>()
+        / count as f64;
+
+    variance.sqrt()
 }
