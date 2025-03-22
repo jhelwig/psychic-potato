@@ -306,20 +306,20 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
         let shot_x = shot_x(shot, UNIT_SCALE_FACTOR);
         // SVG and ShotMarker y-axis are inverted relative to each other.
         let shot_y = shot_y(shot, UNIT_SCALE_FACTOR);
-        let marker_stroke_width = 0.1;
+        let marker_stroke_width = 0.3;
 
-        let fill_color = if shot.tags == "sighter" {
+        let stroke_color = if shot.tags == "sighter" {
             "DimGray"
         } else {
-            "DarkGray"
+            "Gainsboro"
         };
         let shot_circle = html!(
             <circle
                 cx={shot_x.to_string()}
                 cy={shot_y.to_string()}
                 r={marker_radius.to_string()}
-                fill={fill_color}
-                stroke="black"
+                fill="black"
+                stroke={stroke_color}
                 stroke-width={marker_stroke_width.to_string()}
             />
         );
@@ -328,10 +328,10 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
             <text
                 x={shot_x.to_string()}
                 y={shot_y.to_string()}
-                fill="blue"
+                fill="white"
                 font-size="2"
-                stroke="blue"
-                stroke-width="0.05"
+                stroke="black"
+                stroke-width="0.03"
                 text-anchor="middle"
                 dominant-baseline="middle"
                 align-baseline="middle"
@@ -455,6 +455,25 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
         }
     }
 
+    let scored_shot_bounding_box =
+        if let (Some(min_scored_x), Some(min_scored_y), Some(max_scored_x), Some(max_scored_y)) =
+            (min_scored_x, min_scored_y, max_scored_x, max_scored_y)
+        {
+            html!(
+                <rect
+                    id="scored_shot_bounding_box"
+                    fill="DeepSkyBlue"
+                    fill-opacity="0.40"
+                    x={min_scored_x.to_string()}
+                    y={min_scored_y.to_string()}
+                    width={(max_scored_x - min_scored_x).to_string()}
+                    height={(max_scored_y - min_scored_y).to_string()}
+                />
+            )
+        } else {
+            html!()
+        };
+
     html!(
         <>
             <style>
@@ -469,6 +488,7 @@ fn shot_string_svg(props: &ShotStringSvgProps) -> Html {
             >
                 { background }
                 { target }
+                { scored_shot_bounding_box }
                 { for sighters }
                 { for scored_shots }
                 { for shot_hover_boxes }
