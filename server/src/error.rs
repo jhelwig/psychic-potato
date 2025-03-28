@@ -11,8 +11,13 @@ use thiserror::Error;
 
 use crate::app::leagues::LeagueError;
 
+#[remain::sorted]
 #[derive(Debug, Clone, Error)]
 pub enum HttpResponse {
+    #[error("Bad Request")]
+    BadRequest {
+        message: String,
+    },
     #[error("Not Found")]
     NotFound {
         message: String,
@@ -24,6 +29,9 @@ pub enum HttpResponse {
 impl IntoResponse for HttpResponse {
     fn into_response(self) -> Response {
         match self {
+            HttpResponse::BadRequest {
+                message,
+            } => (StatusCode::BAD_REQUEST, Json(json!({"message": message}))).into_response(),
             HttpResponse::Unauthorized => {
                 (StatusCode::UNAUTHORIZED, Json(json!({"message": "Not Authorized"})))
                     .into_response()

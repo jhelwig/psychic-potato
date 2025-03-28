@@ -76,6 +76,7 @@ async fn get_league_match(
 
     Ok(Json(match_object))
 }
+
 async fn handle_league_match_operation(
     DbTransaction(mut txn): DbTransaction<'_>,
     Path(league_id): Path<Uuid>,

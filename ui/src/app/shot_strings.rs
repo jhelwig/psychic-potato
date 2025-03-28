@@ -10,6 +10,7 @@ use shared_types::response::{
 use uuid::Uuid;
 use yew_nested_router::prelude::*;
 
+pub mod shot_string_assignment_panel;
 pub mod shot_string_list_panel;
 pub mod shot_string_panel;
 pub mod shot_string_svg_panel;

@@ -48,6 +48,7 @@ pub mod classes;
 pub mod export;
 pub mod leagues;
 pub mod matches;
+pub mod shooters;
 pub mod shots;
 pub mod strings;
 
@@ -93,6 +94,7 @@ pub fn build(
 
     Router::new()
         .nest("/league", leagues::router(app_state.clone()))
+        .nest("/shooter", shooters::router(app_state.clone()))
         .nest("/user", auth::routes::router(app_state.clone()))
         .layer(service_builder)
         .with_state(app_state)

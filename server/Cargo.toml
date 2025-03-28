@@ -15,10 +15,13 @@ axum_session_auth  = { workspace = true }
 axum_session_sqlx  = { workspace = true }
 chrono             = { workspace = true }
 log                = { workspace = true }
+ordered-float      = { workspace = true }
 password-hash      = { workspace = true }
+remain             = { workspace = true }
 serde              = { workspace = true }
 serde_json         = { workspace = true }
 sqlx               = { workspace = true }
+strsim             = { workspace = true }
 thiserror          = { workspace = true }
 tokio              = { workspace = true }
 tower              = { workspace = true }

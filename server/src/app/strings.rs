@@ -8,7 +8,10 @@ use axum::{
     },
 };
 use chrono::NaiveDate;
-use shared_types::response::ShotMarkerShotString;
+use shared_types::{
+    request::ShotStringOperation,
+    response::ShotMarkerShotString,
+};
 use shotmarker_csv_parser::string::StringScore;
 use uuid::Uuid;
 
@@ -105,7 +108,59 @@ async fn get_string(
     Ok(Json(shot_string.into()))
 }
 
-async fn handle_string_operation() -> Result<Json<ShotMarkerShotString>, AppError> {
-    //
-    todo!()
+async fn handle_string_operation(
+    DbTransaction(mut txn): DbTransaction<'_>,
+    Path((league_id, match_id)): Path<(Uuid, Uuid)>,
+    Json(operation): Json<ShotStringOperation>,
+) -> Result<Json<ShotMarkerShotString>, AppError> {
+    let result = match operation {
+        ShotStringOperation::SetClass {
+            id,
+            class_id,
+        } => {
+            sqlx::query_file!(
+                "queries/shot_strings/set_class.sql",
+                league_id,
+                match_id,
+                id,
+                class_id
+            )
+            .execute(&mut *txn)
+            .await?;
+            sqlx::query_file_as!(
+                SqlxShotMarkerShotString,
+                "queries/shot_strings/get_shot_string.sql",
+                match_id,
+                id
+            )
+            .fetch_one(&mut *txn)
+            .await?
+            .into()
+        }
+        ShotStringOperation::SetShooter {
+            id,
+            shooter_id,
+        } => {
+            sqlx::query_file!(
+                "queries/shot_strings/set_shooter.sql",
+                league_id,
+                match_id,
+                id,
+                shooter_id
+            )
+            .execute(&mut *txn)
+            .await?;
+            sqlx::query_file_as!(
+                SqlxShotMarkerShotString,
+                "queries/shot_strings/get_shot_string.sql",
+                match_id,
+                id
+            )
+            .fetch_one(&mut *txn)
+            .await?
+            .into()
+        }
+    };
+
+    Ok(Json(result))
 }

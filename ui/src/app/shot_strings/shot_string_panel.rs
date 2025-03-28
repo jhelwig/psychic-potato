@@ -19,6 +19,7 @@ use crate::app::{
     shot_strings::{
         ShotStringRoute,
         fetch_shot_string,
+        shot_string_assignment_panel::ShotStringAssignmentPanel,
         shot_string_svg_panel::ShotStringSvgPanel,
     },
 };
@@ -61,6 +62,12 @@ pub fn shot_string_panel(props: &ShotStringPanelProps) -> HtmlResult {
                 <PageSection>
                     { "Tab Section" }
                 </PageSection>
+                <ShotStringAssignmentPanel
+                    league={league.clone()}
+                    match_object={match_object.clone()}
+                    shot_string={shot_string.clone()}
+                />
+                <PageSection />
                 <PageSection>
                     <ShotStringSvgPanel {league} {match_object} {shot_string_id} />
                 </PageSection>

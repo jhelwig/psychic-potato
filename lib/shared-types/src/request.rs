@@ -98,3 +98,36 @@ pub struct RegisterUser {
     pub username: String,
     pub password: String,
 }
+
+#[remain::sorted]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ShooterOperation {
+    Create {
+        name:             String,
+        default_class_id: Option<Uuid>,
+    },
+    Delete {
+        id: Uuid,
+    },
+    SetDefaultClass {
+        id:               Uuid,
+        default_class_id: Option<Uuid>,
+    },
+    SetName {
+        id:   Uuid,
+        name: String,
+    },
+}
+
+#[remain::sorted]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub enum ShotStringOperation {
+    SetClass {
+        id:       Uuid,
+        class_id: Uuid,
+    },
+    SetShooter {
+        id:         Uuid,
+        shooter_id: Uuid,
+    },
+}

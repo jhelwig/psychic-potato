@@ -15,6 +15,7 @@ gloo-utils           = { workspace = true }
 log                  = { workspace = true }
 markdown             = { workspace = true }
 patternfly-yew       = { workspace = true }
+popper-rs            = { workspace = true }
 remain               = { workspace = true }
 serde                = { workspace = true }
 serde_json           = { workspace = true }

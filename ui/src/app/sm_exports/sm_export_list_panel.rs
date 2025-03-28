@@ -21,6 +21,7 @@ use crate::app::{
         SmExportRoute,
         SmExportsRoute,
         fetch_sm_exports,
+        sm_export_upload::SmExportUpload,
     },
 };
 
@@ -48,6 +49,7 @@ pub fn sm_exports_list_panel(props: &SmExportsListPanelProps) -> Html {
                         />
                     </Link<SmExportsRoute>>
                 </Scope<MatchRoute,SmExportsRoute>>
+                <SmExportUpload league={league.clone()} match_object={match_object.clone()} />
             </Content>
             <Content>
                 <Suspense fallback={html!({"Loading SM export list..."})}>

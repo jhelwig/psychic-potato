@@ -36,7 +36,6 @@ pub struct MatchesCreatePanelProps {
 pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
     let league_id = props.league.id;
     let match_name = use_state_eq(String::new);
-    let match_date = use_state_eq(|| None);
     let is_creating = use_state_eq(|| false);
     let maybe_match: UseStateHandle<Option<Result<Match, String>>> = use_state_eq(|| None);
     let datepicker_state = use_state_eq(|| None);
@@ -56,6 +55,7 @@ pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
         let match_name = match_name.clone();
         let is_creating = is_creating.setter();
         let maybe_match = maybe_match.clone();
+        let datepicker_state = datepicker_state.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
@@ -64,7 +64,7 @@ pub fn matches_create_panel(props: &MatchesCreatePanelProps) -> HtmlResult {
             // Create match using match_name
             let match_operation = MatchOperation::Create {
                 name:       (*match_name).clone(),
-                event_date: (*match_date).unwrap_or_else(|| Utc::now().naive_local().date()),
+                event_date: (*datepicker_state).unwrap_or_else(|| Utc::now().naive_local().date()),
             };
             let spawned_match_name = match_name.clone();
             let spawned_maybe_match_setter = maybe_match.setter();

@@ -2114,6 +2114,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 
 [[package]]
+name = "ordered-float"
+version = "5.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2c1f9f56e534ac6a9b8a4600bdf0f530fb393b5f393e7b4d03489c3cf0c3f01"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "overload"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2749,12 +2758,15 @@ dependencies = [
  "axum_session_sqlx",
  "chrono",
  "log",
+ "ordered-float",
  "password-hash",
+ "remain",
  "serde",
  "serde_json",
  "shared-types",
  "shotmarker-csv-parser",
  "sqlx",
+ "strsim",
  "thiserror 2.0.12",
  "tokio",
  "tower",
@@ -3523,6 +3535,7 @@ dependencies = [
  "log",
  "markdown",
  "patternfly-yew",
+ "popper-rs",
  "remain",
  "serde",
  "serde_json",
