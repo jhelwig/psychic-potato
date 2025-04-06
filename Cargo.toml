@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members  = ["lib/*", "server", "ui", "xtask", "lib/*/examples/*"]
+members  = ["lib/*", "server", "ui", "xtask", "lib/*/examples/*", "scratch"]
 
 [workspace.package]
 authors = ["Jacob Helwig <jacob@technosorcery.net>"]
@@ -20,10 +20,12 @@ axum_session = { version = "0.16.0" }
 # axum_session_auth    = { version = "0.16.0", features = ["rest_mode"] }
 axum_session_auth    = { version = "0.16.0" }
 axum_session_sqlx    = { version = "0.5.0", features = ["sqlite", "tls-rustls"] }
+base64               = { version = "0.22.1" }
 browser-panic-hook   = { version = "0.2.0" }
 cfg-if               = { version = "1.0.0" }
 chrono               = { version = "0.4.40", features = ["serde"] }
 chrono-tz            = { version = "0.10.1", features = ["serde"] }
+flate2               = { version = "1.1.1", features = ["zlib-rs"] }
 gloo-net             = { version = "0.6.0" }
 gloo-utils           = { version = "0.2.0" }
 log                  = { version = "0.4.26" }

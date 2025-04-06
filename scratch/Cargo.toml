@@ -1,0 +1,17 @@
+[package]
+name              = "scratch"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+description       = "A scratch project for testing and experimentation"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = { workspace = true }
+base64 = { workspace = true }
+flate2 = { workspace = true }
+
+[[bin]]
+name = "scratch"
+path = "src/main.rs"
